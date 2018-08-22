@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'JingDataNetwork_Example' do
+  pod 'JingDataNetwork', :path => '../'
+
+  target 'JingDataNetwork_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
