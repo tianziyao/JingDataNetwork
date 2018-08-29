@@ -1,5 +1,4 @@
 import XCTest
-import JingDataNetwork
 
 class Tests: XCTestCase {
     

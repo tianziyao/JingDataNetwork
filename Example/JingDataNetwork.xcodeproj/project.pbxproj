@@ -8,13 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		12030E61585BAA53C0DE353E /* Pods_JingDataNetwork_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CED06F218C789094772ADD1 /* Pods_JingDataNetwork_Example.framework */; };
-		6067471D9DE84C2860A540A3 /* Pods_JingDataNetwork_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FFF0338E9F748E9236D238B /* Pods_JingDataNetwork_Tests.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
+		94BEDDFC213666D400548A0B /* BaseResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BEDDFB213666D400548A0B /* BaseResponse.swift */; };
+		94BEDE002136672800548A0B /* Api.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BEDDFF2136672800548A0B /* Api.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,9 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0B68E837EC94B2B11447DAED /* JingDataNetwork.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = JingDataNetwork.podspec; path = ../JingDataNetwork.podspec; sourceTree = "<group>"; };
-		1EC7D52519690CD773A2BD40 /* Pods-JingDataNetwork_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JingDataNetwork_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JingDataNetwork_Tests/Pods-JingDataNetwork_Tests.debug.xcconfig"; sourceTree = "<group>"; };
-		50D6FD4C47D1E5472474E39A /* Pods-JingDataNetwork_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JingDataNetwork_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-JingDataNetwork_Tests/Pods-JingDataNetwork_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		0B68E837EC94B2B11447DAED /* JingDataNetwork.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = JingDataNetwork.podspec; path = ../JingDataNetwork.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		607FACD01AFB9204008FA782 /* JingDataNetwork_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JingDataNetwork_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -44,9 +43,11 @@
 		653E21601DBCDAE4F9FE7F55 /* Pods-JingDataNetwork_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JingDataNetwork_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JingDataNetwork_Example/Pods-JingDataNetwork_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		6CED06F218C789094772ADD1 /* Pods_JingDataNetwork_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_JingDataNetwork_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FFF0338E9F748E9236D238B /* Pods_JingDataNetwork_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_JingDataNetwork_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		9892194C9CBA000DF95B4AC9 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		94BEDDFB213666D400548A0B /* BaseResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseResponse.swift; sourceTree = "<group>"; };
+		94BEDDFF2136672800548A0B /* Api.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Api.swift; sourceTree = "<group>"; };
+		9892194C9CBA000DF95B4AC9 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		E2AA56241042010DE709ECD9 /* Pods-JingDataNetwork_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JingDataNetwork_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-JingDataNetwork_Example/Pods-JingDataNetwork_Example.release.xcconfig"; sourceTree = "<group>"; };
-		E2B895904C60DA3B4BA85C42 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		E2B895904C60DA3B4BA85C42 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +63,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6067471D9DE84C2860A540A3 /* Pods_JingDataNetwork_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +93,8 @@
 		607FACD21AFB9204008FA782 /* Example for JingDataNetwork */ = {
 			isa = PBXGroup;
 			children = (
+				94BEDDFE2136671200548A0B /* Api */,
+				94BEDDFD213666F700548A0B /* Network */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				607FACD91AFB9204008FA782 /* Main.storyboard */,
@@ -144,10 +146,24 @@
 			children = (
 				653E21601DBCDAE4F9FE7F55 /* Pods-JingDataNetwork_Example.debug.xcconfig */,
 				E2AA56241042010DE709ECD9 /* Pods-JingDataNetwork_Example.release.xcconfig */,
-				1EC7D52519690CD773A2BD40 /* Pods-JingDataNetwork_Tests.debug.xcconfig */,
-				50D6FD4C47D1E5472474E39A /* Pods-JingDataNetwork_Tests.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		94BEDDFD213666F700548A0B /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				94BEDDFB213666D400548A0B /* BaseResponse.swift */,
+			);
+			name = Network;
+			sourceTree = "<group>";
+		};
+		94BEDDFE2136671200548A0B /* Api */ = {
+			isa = PBXGroup;
+			children = (
+				94BEDDFF2136672800548A0B /* Api.swift */,
+			);
+			name = Api;
 			sourceTree = "<group>";
 		};
 		C1B33F7E2117871FDF59D400 /* Frameworks */ = {
@@ -185,7 +201,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACF21AFB9204008FA782 /* Build configuration list for PBXNativeTarget "JingDataNetwork_Tests" */;
 			buildPhases = (
-				A17F1468172531B4A41DFAB7 /* [CP] Check Pods Manifest.lock */,
 				607FACE11AFB9204008FA782 /* Sources */,
 				607FACE21AFB9204008FA782 /* Frameworks */,
 				607FACE31AFB9204008FA782 /* Resources */,
@@ -212,10 +227,12 @@
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = M6A2LG544R;
 						LastSwiftMigration = 0900;
 					};
 					607FACE41AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = M6A2LG544R;
 						LastSwiftMigration = 0900;
 						TestTargetID = 607FACCF1AFB9204008FA782;
 					};
@@ -261,24 +278,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		A17F1468172531B4A41DFAB7 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-JingDataNetwork_Tests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		B842668E2561333DD2B28D43 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -286,11 +285,25 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-JingDataNetwork_Example/Pods-JingDataNetwork_Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/JingDataNetwork/JingDataNetwork.framework",
+				"${BUILT_PRODUCTS_DIR}/Moya/Moya.framework",
+				"${BUILT_PRODUCTS_DIR}/ObjectMapper/ObjectMapper.framework",
+				"${BUILT_PRODUCTS_DIR}/Result/Result.framework",
+				"${BUILT_PRODUCTS_DIR}/RxCocoa/RxCocoa.framework",
+				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/JingDataNetwork.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Moya.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ObjectMapper.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Result.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxCocoa.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -322,7 +335,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94BEDDFC213666D400548A0B /* BaseResponse.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
+				94BEDE002136672800548A0B /* Api.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -469,6 +484,7 @@
 			baseConfigurationReference = 653E21601DBCDAE4F9FE7F55 /* Pods-JingDataNetwork_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = M6A2LG544R;
 				INFOPLIST_FILE = JingDataNetwork/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
@@ -484,6 +500,7 @@
 			baseConfigurationReference = E2AA56241042010DE709ECD9 /* Pods-JingDataNetwork_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = M6A2LG544R;
 				INFOPLIST_FILE = JingDataNetwork/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
@@ -496,8 +513,8 @@
 		};
 		607FACF31AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1EC7D52519690CD773A2BD40 /* Pods-JingDataNetwork_Tests.debug.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = M6A2LG544R;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -518,8 +535,8 @@
 		};
 		607FACF41AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 50D6FD4C47D1E5472474E39A /* Pods-JingDataNetwork_Tests.release.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = M6A2LG544R;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",

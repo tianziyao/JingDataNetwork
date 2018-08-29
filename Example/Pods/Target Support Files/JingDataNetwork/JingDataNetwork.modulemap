@@ -1,0 +1,6 @@
+framework module JingDataNetwork {
+  umbrella header "JingDataNetwork-umbrella.h"
+
+  export *
+  module * { export * }
+}

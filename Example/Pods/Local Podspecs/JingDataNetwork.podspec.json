@@ -1,0 +1,39 @@
+{
+  "name": "JingDataNetwork",
+  "version": "0.1.0",
+  "summary": "A short description of JingDataNetwork.",
+  "description": "A long long description of JingDataNetwork.",
+  "homepage": "https://github.com/tianziyao/JingDataNetwork",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "tianziyao": "tianziyao@jingdata.com"
+  },
+  "source": {
+    "git": "",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "9.0"
+  },
+  "source_files": "JingDataNetwork/Classes/**/*",
+  "dependencies": {
+    "Moya": [
+      "~> 11.0"
+    ],
+    "ObjectMapper": [
+      "~> 3.3"
+    ],
+    "RxSwift": [
+      "~> 4.0"
+    ],
+    "RxCocoa": [
+      "~> 4.0"
+    ],
+    "SwiftyJSON": [
+      "~> 4.0"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 //
-//  JingDataNetworkBaseModel.swift
+//  JingDataNetworkBaseResponse.swift
 //  Alamofire
 //
 //  Created by Tian on 2018/8/22.
@@ -7,10 +7,15 @@
 
 import Foundation
 import ObjectMapper
+import Moya
 
-class JingDataNetworkBaseResponse<DataSource: Mappable>: Mappable {
-    
-    required init?(map: Map) {}
-    
-    func mapping(map: Map) {}
+public protocol JingDataNetworkBaseResponseProtocol: Mappable {
+    associatedtype DataSource
+    func makeCustomJingDataError() -> JingDataNetworkError?
+}
+
+public protocol JingDataConfigProtocol {
+    static var networkManager: Manager { set get }
+    static var plugins: [PluginType] { set get }
+    static func handleJingDataNetworkError(_ error: JingDataNetworkError)
 }
