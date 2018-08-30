@@ -25,6 +25,13 @@ public enum JingDataNetworkManager<T: TargetType, C: JingDataConfigProtocol> {
     
     case base(api: T)
     
+    public func observer<R: JingDataNetworkBaseResponseProtocol>(test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
+        switch self {
+        case .base(let api):
+            return createObserver(api: api, test: test, progress: progress)
+        }
+    }
+    
     public func observer<R>(test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
         switch self {
         case .base(let api):
@@ -32,20 +39,6 @@ public enum JingDataNetworkManager<T: TargetType, C: JingDataConfigProtocol> {
         }
     }
     
-//    func createObjectObserver<R>(api: T, test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
-//        return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
-//            do {
-//                let model: R = try JingDataNetworkDataParser.handle(data: resp.data) as! R
-//                ob.onNext(model as! R)
-//            }
-//            catch let error as JingDataNetworkError {
-//                self.handle(ob: ob, error: error)
-//            }
-//            catch {}
-//        })
-//    }
-
-        
     func createObserver<R>(api: T, test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
         if R.Type.self == String.Type.self {
             return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
@@ -87,24 +80,25 @@ public enum JingDataNetworkManager<T: TargetType, C: JingDataConfigProtocol> {
                 catch {}
             })
         }
-//        else if R.Type.self == M.Type.self {
-//            return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
-//                do {
-//                    let model: M = try JingDataNetworkDataParser.handle(data: resp.data)
-//                    ob.onNext(model as! R)
-//                }
-//                catch let error as JingDataNetworkError {
-//                    self.handle(ob: ob, error: error)
-//                }
-//                catch {}
-//            })
-//        }
         else {
             
             return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, data) in
                 self.handle(ob: ob, error: .parser(.type))
             })
         }
+    }
+    
+    func createObserver<R: JingDataNetworkBaseResponseProtocol>(api: T, test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
+        return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
+            do {
+                let model: R = try JingDataNetworkDataParser.handle(data: resp.data)
+                ob.onNext(model)
+            }
+            catch let error as JingDataNetworkError {
+                self.handle(ob: ob, error: error)
+            }
+            catch {}
+        })
     }
     
     func createGeneralObserver<D>(api: T, test: Bool = false, progress: ProgressBlock? = nil, success: @escaping (AnyObserver<D>, Response) -> (), error: JingDataNetworkErrorCallback? = nil) -> Observable<D> {

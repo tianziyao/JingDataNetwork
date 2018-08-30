@@ -103,14 +103,14 @@ class ViewController: UIViewController {
         JingDataNetworkSequencer<BaseNetworkConfig>.differentApi()
             .next(api: { (data: String?) -> TestApi in
                 return .m
-            }, success: { (data: BaseResp<UserInfo>) in
-                print(data.data!.age!)
+            }, success: { (data: String) in
+                print(data)
             }, error: { (error) in
                 print(error)
             }, test: true)
             .next(api: { (data: BaseResp<UserInfo>?) -> TestApi in
                 return .m
-            }, success: { (data: BaseResp<Empty>) in
+            }, success: { (data: UserInfo) in
                 //print(data.data!.age!)
             }, error: { (error) in
                 print(error)
@@ -124,21 +124,21 @@ class ViewController: UIViewController {
         }.disposed(by: bag)
     }
     
-    func wait() {
-        let o1: Observable<BaseResp<UserInfo>> = JingDataNetworkDifferentApiSequencer<BaseNetworkConfig>.observerOfzip(api: TestApi.m, test: true)
-        let o2: Observable<BaseResp<UserInfo>> = JingDataNetworkDifferentApiSequencer<BaseNetworkConfig>.observerOfzip(api: TestApi.n, test: true)
-        let o3: Observable<String> = JingDataNetworkDifferentApiSequencer<BaseNetworkConfig>.observerOfzip(api: Test2Api.n, test: true)
-        let o4: Observable<BaseResp<UserInfo>> = JingDataNetworkDifferentApiSequencer<BaseNetworkConfig>.observerOfzip(api: Test2Api.n, test: true)
-        Observable.zip(o1, o2, o3, o4)
-        .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { (str1, user1, str2, user2) in
-                print(Thread.current)
-                print(str1, user1, str2, user2)
-            }, onError: { (e) in
-                print(e)
-            })
-        .disposed(by: bag)
-    }
-    
+//    func wait() {
+//        let o1: Observable<BaseResp<UserInfo>> = JingDataNetworkDifferentApiSequencer<BaseNetworkConfig>.observerOfzip(api: TestApi.m, test: true)
+//        let o2: Observable<BaseResp<UserInfo>> = JingDataNetworkDifferentApiSequencer<BaseNetworkConfig>.observerOfzip(api: TestApi.n, test: true)
+//        let o3: Observable<String> = JingDataNetworkDifferentApiSequencer<BaseNetworkConfig>.observerOfzip(api: Test2Api.n, test: true)
+//        let o4: Observable<BaseResp<UserInfo>> = JingDataNetworkDifferentApiSequencer<BaseNetworkConfig>.observerOfzip(api: Test2Api.n, test: true)
+//        Observable.zip(o1, o2, o3, o4)
+//        .observeOn(MainScheduler.instance)
+//            .subscribe(onNext: { (str1, user1, str2, user2) in
+//                print(Thread.current)
+//                print(str1, user1, str2, user2)
+//            }, onError: { (e) in
+//                print(e)
+//            })
+//        .disposed(by: bag)
+//    }
+//
 }
 
