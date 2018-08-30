@@ -80,7 +80,7 @@ class ViewController: UIViewController {
     
     
     func zip() {
-        JingDataNetworkSequencer<BaseNetworkConfig>.sameApi()
+        JingDataNetworkSequencer<BaseNetworkConfig>.sameModel()
             .zip(apis: [TestApi.m, .n], test: true)
             .observeOn(MainScheduler.instance)
             .subscribe(onNext: { (d: [BaseResp<UserInfo>]) in
@@ -90,7 +90,7 @@ class ViewController: UIViewController {
     }
     
     func map() {
-        JingDataNetworkSequencer<BaseNetworkConfig>.sameApi()
+        JingDataNetworkSequencer<BaseNetworkConfig>.sameModel()
             .map(apis: [TestApi.m, .n], test: true)
             .observeOn(MainScheduler.instance)
             .subscribe(onNext: { (d: BaseResp<UserInfo>) in
@@ -100,7 +100,7 @@ class ViewController: UIViewController {
     }
     
     func next() {
-        JingDataNetworkSequencer<BaseNetworkConfig>.differentApi()
+        JingDataNetworkSequencer<BaseNetworkConfig>.differentModel()
             .next(api: { (data: String?) -> TestApi in
                 return .m
             }, success: { (data: String) in

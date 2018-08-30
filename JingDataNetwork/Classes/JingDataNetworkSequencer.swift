@@ -14,16 +14,16 @@ public typealias JingDataNetworkViodCallback = () -> ()
 
 public class JingDataNetworkSequencer<C: JingDataConfigProtocol> {
     
-    public static func sameApi<T: TargetType>() -> JingDataNetworkSameApiSequencer<T, C> {
-        return JingDataNetworkSameApiSequencer<T, C>()
+    public static func sameModel<T: TargetType>() -> JingDataNetworkSameModelSequencer<T, C> {
+        return JingDataNetworkSameModelSequencer<T, C>()
     }
     
-    public static func differentApi() -> JingDataNetworkDifferentApiSequencer<C> {
-        return JingDataNetworkDifferentApiSequencer<C>()
+    public static func differentModel() -> JingDataNetworkDifferentModelSequencer<C> {
+        return JingDataNetworkDifferentModelSequencer<C>()
     }
 }
 
-public class JingDataNetworkDifferentApiSequencer<C: JingDataConfigProtocol> {
+public class JingDataNetworkDifferentModelSequencer<C: JingDataConfigProtocol> {
     
     var blocks = [JingDataNetworkViodCallback]()
     let semaphore = DispatchSemaphore(value: 1)
@@ -33,7 +33,7 @@ public class JingDataNetworkDifferentApiSequencer<C: JingDataConfigProtocol> {
     var results = [Any]()
     var index: Int = 0
     
-    public func next<T: TargetType, N: JingDataNetworkBaseResponseProtocol, P>(api: @escaping (P?) -> T, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentApiSequencer {
+    public func next<T: TargetType, N: JingDataNetworkBaseResponseProtocol, P>(api: @escaping (P?) -> T, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
         let block: JingDataNetworkViodCallback = {
             self.semaphore.wait()
             JingDataNetworkManager<T, C>.base(api: api(self.data as? P)).observer(test: test, progress: progress)
@@ -58,7 +58,7 @@ public class JingDataNetworkDifferentApiSequencer<C: JingDataConfigProtocol> {
         return self
     }
     
-    public func next<T: TargetType, N, P>(api: @escaping (P?) -> T, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentApiSequencer {
+    public func next<T: TargetType, N, P>(api: @escaping (P?) -> T, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
         let block: JingDataNetworkViodCallback = {
             self.semaphore.wait()
             JingDataNetworkManager<T, C>.base(api: api(self.data as? P)).observer(test: test, progress: progress)
@@ -85,7 +85,7 @@ public class JingDataNetworkDifferentApiSequencer<C: JingDataConfigProtocol> {
     
     public func run() -> PrimitiveSequence<SingleTrait, [Any]> {
         let ob = Single<[Any]>.create { (single) -> Disposable in
-            let queue = DispatchQueue(label: "\(JingDataNetworkDifferentApiSequencer.self)", qos: .default, attributes: .concurrent)
+            let queue = DispatchQueue(label: "\(JingDataNetworkDifferentModelSequencer.self)", qos: .default, attributes: .concurrent)
             queue.async {
                 for i in 0 ..< self.blocks.count {
                     self.index = i
@@ -116,7 +116,7 @@ public class JingDataNetworkDifferentApiSequencer<C: JingDataConfigProtocol> {
     }
 }
 
-public extension JingDataNetworkDifferentApiSequencer {
+public extension JingDataNetworkDifferentModelSequencer {
     
     static public func observerOfzip<T: TargetType, R: JingDataNetworkBaseResponseProtocol>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
         return JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
@@ -127,7 +127,7 @@ public extension JingDataNetworkDifferentApiSequencer {
     }
 }
 
-public class JingDataNetworkSameApiSequencer<T: TargetType, C: JingDataConfigProtocol> {
+public class JingDataNetworkSameModelSequencer<T: TargetType, C: JingDataConfigProtocol> {
     
     public init () {}
     
