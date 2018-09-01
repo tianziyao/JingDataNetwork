@@ -33,10 +33,30 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
     var results = [Any]()
     var index: Int = 0
     
-    public func next<T: TargetType, N: JingDataNetworkBaseResponse, P>(api: @escaping (P?) -> T, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
+    public func next<T: TargetType, N: JingDataNetworkBaseResponse, P>(with: @escaping (P) -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
+        let api: () -> T? = {
+            guard let preData = self.data as? P else { return nil }
+            return with(preData)
+        }
+        return next(api: api, progress: progress, success: success, error: error, test: test)
+    }
+    
+    public func next<T: TargetType, N, P>(with: @escaping (P) -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
+        let api: () -> T? = {
+            guard let preData = self.data as? P else { return nil }
+            return with(preData)
+        }
+        return next(api: api, progress: progress, success: success, error: error, test: test)
+    }
+    
+    public func next<T: TargetType, N: JingDataNetworkBaseResponse>(api: @escaping () -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
         let block: JingDataNetworkViodCallback = {
+            guard let api = api() else {
+                self.requestSuccess = false
+                return
+            }
             self.semaphore.wait()
-            JingDataNetworkManager<T, C>.base(api: api(self.data as? P)).observer(test: test, progress: progress)
+            JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
                 .observeOn(MainScheduler.instance)
                 .subscribe(onNext: { [weak self] (data: N) in
                     self?.data = data
@@ -58,10 +78,14 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
         return self
     }
     
-    public func next<T: TargetType, N, P>(api: @escaping (P?) -> T, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
+    public func next<T: TargetType, N>(api: @escaping () -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
         let block: JingDataNetworkViodCallback = {
+            guard let api = api() else {
+                self.requestSuccess = false
+                return
+            }
             self.semaphore.wait()
-            JingDataNetworkManager<T, C>.base(api: api(self.data as? P)).observer(test: test, progress: progress)
+            JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
                 .observeOn(MainScheduler.instance)
                 .subscribe(onNext: { [weak self] (data: N) in
                     self?.data = data
@@ -118,11 +142,11 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
 
 public extension JingDataNetworkDifferentModelSequencer {
     
-    static public func observerOfzip<T: TargetType, R: JingDataNetworkBaseResponse>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
+    public func observerOfzip<T: TargetType, R: JingDataNetworkBaseResponse>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
         return JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
     }
     
-    static public func observerOfzip<T: TargetType, R>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
+    public func observerOfzip<T: TargetType, R>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
         return JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
     }
 }

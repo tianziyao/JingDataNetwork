@@ -19,3 +19,4 @@ public protocol JingDataNetworkConfig {
     static var plugins: [PluginType] { set get }
     static func handleJingDataNetworkError(_ error: JingDataNetworkError)
 }
+
