@@ -12,7 +12,7 @@ import RxSwift
 import JingDataNetwork
 import Moya
 
-struct BaseNetworkConfig: JingDataConfigProtocol {
+struct BaseNetworkConfig: JingDataNetworkConfig {
     static var plugins: [PluginType] {
         set {
             

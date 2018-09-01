@@ -21,11 +21,11 @@ public class NetworkCancelWraper {
     func cancel() { cancellable?.cancel() }
 }
 
-public enum JingDataNetworkManager<T: TargetType, C: JingDataConfigProtocol> {
+public enum JingDataNetworkManager<T: TargetType, C: JingDataNetworkConfig> {
     
     case base(api: T)
     
-    public func observer<R: JingDataNetworkBaseResponseProtocol>(test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
+    public func observer<R: JingDataNetworkBaseResponse>(test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
         switch self {
         case .base(let api):
             return createObserver(api: api, test: test, progress: progress)
@@ -88,7 +88,7 @@ public enum JingDataNetworkManager<T: TargetType, C: JingDataConfigProtocol> {
         }
     }
     
-    func createObserver<R: JingDataNetworkBaseResponseProtocol>(api: T, test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
+    func createObserver<R: JingDataNetworkBaseResponse>(api: T, test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
         return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
             do {
                 let model: R = try JingDataNetworkDataParser.handle(data: resp.data)

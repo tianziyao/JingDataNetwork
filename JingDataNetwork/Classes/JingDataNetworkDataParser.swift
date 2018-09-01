@@ -12,7 +12,7 @@ import Moya
 
 public struct JingDataNetworkDataParser {
     
-    public static func handle<R: JingDataNetworkBaseResponseProtocol>(data: Data) throws -> R {
+    public static func handle<R: JingDataNetworkBaseResponse>(data: Data) throws -> R {
         guard let JSONString = String.init(data: data, encoding: .utf8) else {
             throw JingDataNetworkError.parser(.string)
         }
@@ -25,7 +25,7 @@ public struct JingDataNetworkDataParser {
         return response
     }
     
-    public static func handle<R: JingDataNetworkBaseResponseProtocol>(JSONString: String) throws -> R {
+    public static func handle<R: JingDataNetworkBaseResponse>(JSONString: String) throws -> R {
         guard let response: R = JingDataNetworkResponseBuilder.create(by: JSONString) else {
             throw JingDataNetworkError.parser(.model)
         }
@@ -35,7 +35,7 @@ public struct JingDataNetworkDataParser {
         return response
     }
     
-    public static func handle<R: JingDataNetworkBaseResponseProtocol>(dic: [String: Any]) throws -> R {
+    public static func handle<R: JingDataNetworkBaseResponse>(dic: [String: Any]) throws -> R {
         guard let response: R = JingDataNetworkResponseBuilder.create(by: dic) else {
             throw JingDataNetworkError.parser(.model)
         }

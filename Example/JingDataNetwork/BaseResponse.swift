@@ -11,7 +11,7 @@ import JingDataNetwork
 import ObjectMapper
 import Moya
 
-class BaseResp<T: Mappable>: JingDataNetworkBaseResponseProtocol {
+class BaseResp<T: Mappable>: JingDataNetworkBaseResponse {
     
     typealias DataSource = T
     

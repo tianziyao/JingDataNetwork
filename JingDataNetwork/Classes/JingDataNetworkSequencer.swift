@@ -12,7 +12,7 @@ import RxSwift
 
 public typealias JingDataNetworkViodCallback = () -> ()
 
-public class JingDataNetworkSequencer<C: JingDataConfigProtocol> {
+public class JingDataNetworkSequencer<C: JingDataNetworkConfig> {
     
     public static func sameModel<T: TargetType>() -> JingDataNetworkSameModelSequencer<T, C> {
         return JingDataNetworkSameModelSequencer<T, C>()
@@ -23,7 +23,7 @@ public class JingDataNetworkSequencer<C: JingDataConfigProtocol> {
     }
 }
 
-public class JingDataNetworkDifferentModelSequencer<C: JingDataConfigProtocol> {
+public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
     
     var blocks = [JingDataNetworkViodCallback]()
     let semaphore = DispatchSemaphore(value: 1)
@@ -33,7 +33,7 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataConfigProtocol> {
     var results = [Any]()
     var index: Int = 0
     
-    public func next<T: TargetType, N: JingDataNetworkBaseResponseProtocol, P>(api: @escaping (P?) -> T, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
+    public func next<T: TargetType, N: JingDataNetworkBaseResponse, P>(api: @escaping (P?) -> T, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
         let block: JingDataNetworkViodCallback = {
             self.semaphore.wait()
             JingDataNetworkManager<T, C>.base(api: api(self.data as? P)).observer(test: test, progress: progress)
@@ -118,7 +118,7 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataConfigProtocol> {
 
 public extension JingDataNetworkDifferentModelSequencer {
     
-    static public func observerOfzip<T: TargetType, R: JingDataNetworkBaseResponseProtocol>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
+    static public func observerOfzip<T: TargetType, R: JingDataNetworkBaseResponse>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
         return JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
     }
     
@@ -127,11 +127,11 @@ public extension JingDataNetworkDifferentModelSequencer {
     }
 }
 
-public class JingDataNetworkSameModelSequencer<T: TargetType, C: JingDataConfigProtocol> {
+public class JingDataNetworkSameModelSequencer<T: TargetType, C: JingDataNetworkConfig> {
     
     public init () {}
     
-    public func zip<R: JingDataNetworkBaseResponseProtocol>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<[R]> {
+    public func zip<R: JingDataNetworkBaseResponse>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<[R]> {
         var obs = [Observable<R>]()
         for api in apis {
             let ob: Observable<R> = JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
@@ -140,7 +140,7 @@ public class JingDataNetworkSameModelSequencer<T: TargetType, C: JingDataConfigP
         return Observable.zip(obs)
     }
     
-    public func map<R: JingDataNetworkBaseResponseProtocol>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
+    public func map<R: JingDataNetworkBaseResponse>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
         var obs = [Observable<R>]()
         for api in apis {
             let ob: Observable<R> = JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)

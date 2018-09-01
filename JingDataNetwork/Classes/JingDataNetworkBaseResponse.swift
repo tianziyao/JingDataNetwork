@@ -9,12 +9,12 @@ import Foundation
 import ObjectMapper
 import Moya
 
-public protocol JingDataNetworkBaseResponseProtocol: Mappable {
+public protocol JingDataNetworkBaseResponse: Mappable {
     associatedtype DataSource
     func makeCustomJingDataError() -> JingDataNetworkError?
 }
 
-public protocol JingDataConfigProtocol {
+public protocol JingDataNetworkConfig {
     static var networkManager: Manager { set get }
     static var plugins: [PluginType] { set get }
     static func handleJingDataNetworkError(_ error: JingDataNetworkError)
