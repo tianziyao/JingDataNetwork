@@ -1,8 +1,7 @@
 {
   "name": "JingDataNetwork",
-  "version": "0.1.0",
-  "summary": "A short description of JingDataNetwork.",
-  "description": "A long long description of JingDataNetwork.",
+  "version": "0.3.0",
+  "summary": "网络请求+解析为任意模型+请求顺序控制",
   "homepage": "https://github.com/tianziyao/JingDataNetwork",
   "license": {
     "type": "MIT",
@@ -12,8 +11,8 @@
     "tianziyao": "tianziyao@jingdata.com"
   },
   "source": {
-    "git": "",
-    "tag": "0.1.0"
+    "git": "https://github.com/tianziyao/JingDataNetwork.git",
+    "tag": "0.3.0"
   },
   "platforms": {
     "ios": "9.0"
