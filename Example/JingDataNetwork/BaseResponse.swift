@@ -25,7 +25,7 @@ class BaseResp<T: Mappable>: JingDataNetworkBaseResponse {
         data <- map["data"]
     }
     
-    func makeCustomJingDataError() -> JingDataNetworkError? {
+    func makeCustomJingDataNetworkError() -> JingDataNetworkError? {
         guard let c = code else { return nil }
         guard c != 0 else { return nil }
         return JingDataNetworkError.custom(code: c)

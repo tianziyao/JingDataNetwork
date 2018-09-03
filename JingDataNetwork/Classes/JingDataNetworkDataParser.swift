@@ -19,7 +19,7 @@ public struct JingDataNetworkDataParser {
         guard let response: R = JingDataNetworkResponseBuilder.create(by: JSONString) else {
             throw JingDataNetworkError.parser(.model)
         }
-        if let customError = response.makeCustomJingDataError() {
+        if let customError = response.makeCustomJingDataNetworkError() {
             throw customError
         }
         return response
@@ -29,7 +29,7 @@ public struct JingDataNetworkDataParser {
         guard let response: R = JingDataNetworkResponseBuilder.create(by: JSONString) else {
             throw JingDataNetworkError.parser(.model)
         }
-        if let customError = response.makeCustomJingDataError() {
+        if let customError = response.makeCustomJingDataNetworkError() {
             throw customError
         }
         return response
@@ -39,7 +39,7 @@ public struct JingDataNetworkDataParser {
         guard let response: R = JingDataNetworkResponseBuilder.create(by: dic) else {
             throw JingDataNetworkError.parser(.model)
         }
-        if let customError = response.makeCustomJingDataError() {
+        if let customError = response.makeCustomJingDataNetworkError() {
             throw customError
         }
         return response

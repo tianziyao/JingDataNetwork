@@ -11,7 +11,7 @@ import Moya
 
 public protocol JingDataNetworkBaseResponse: Mappable {
     associatedtype DataSource
-    func makeCustomJingDataError() -> JingDataNetworkError?
+    func makeCustomJingDataNetworkError() -> JingDataNetworkError?
 }
 
 public protocol JingDataNetworkConfig {
