@@ -15,8 +15,8 @@ public protocol JingDataNetworkBaseResponse: Mappable {
 }
 
 public protocol JingDataNetworkConfig {
-    static var networkManager: Manager { set get }
-    static var plugins: [PluginType] { set get }
+    static var networkManager: Manager { get }
+    static var plugins: [PluginType] { get }
     static func handleJingDataNetworkError(_ error: JingDataNetworkError)
 }
 

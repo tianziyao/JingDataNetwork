@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'JingDataNetwork'
-  s.version          = '0.3.0'
+  s.version          = '0.4.0'
   s.summary          = '网络请求+解析为任意模型+请求顺序控制'
 
   s.homepage         = 'https://github.com/tianziyao/JingDataNetwork'
