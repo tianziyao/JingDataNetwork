@@ -1,6 +1,6 @@
 {
   "name": "JingDataNetwork",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "summary": "网络请求+解析为任意模型+请求顺序控制",
   "homepage": "https://github.com/tianziyao/JingDataNetwork",
   "license": {
@@ -12,14 +12,14 @@
   },
   "source": {
     "git": "https://github.com/tianziyao/JingDataNetwork.git",
-    "tag": "0.3.0"
+    "tag": "0.4.0"
   },
   "platforms": {
     "ios": "9.0"
   },
   "source_files": "JingDataNetwork/Classes/**/*",
   "dependencies": {
-    "Moya": [
+    "Moya/RxSwift": [
       "~> 11.0"
     ],
     "ObjectMapper": [

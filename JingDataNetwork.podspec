@@ -20,7 +20,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '9.0'
   s.source_files = 'JingDataNetwork/Classes/**/*'
-  s.dependency 'Moya', '~> 11.0'
+  s.dependency 'Moya/RxSwift', '~> 11.0'
   s.dependency 'ObjectMapper', '~> 3.3'
   s.dependency 'RxSwift',    '~> 4.0'
   s.dependency 'RxCocoa',    '~> 4.0'

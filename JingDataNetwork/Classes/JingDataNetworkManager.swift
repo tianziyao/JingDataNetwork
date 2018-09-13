@@ -163,4 +163,139 @@ public enum JingDataNetworkManager<T: TargetType, C: JingDataNetworkConfig> {
     }
 }
 
+public extension TargetType {
+    
+    public func observer<R: JingDataNetworkBaseResponse>(test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
+        return createObserver(test: test, progress: progress)
+    }
+    
+    public func observer<R>(test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
+        return createObserver(test: test, progress: progress)
+    }
+    
+    func createObserver<R>(test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
+        if R.Type.self == String.Type.self {
+            return createGeneralObserver(test: test, progress: progress, success: { (ob, resp) in
+                do {
+                    let string: String = try JingDataNetworkDataParser.handle(resp: resp)
+                    ob.onNext(string as! R)
+                }
+                catch let error as JingDataNetworkError {
+                    self.handle(ob: ob, error: error)
+                }
+                catch {}
+            })
+        }
+        else if R.Type.self == Data.Type.self {
+            return createGeneralObserver(test: test, progress: progress, success: { (ob, resp) in
+                ob.onNext(resp.data as! R)
+            })
+        }
+        else if R.Type.self == UIImage.Type.self {
+            return createGeneralObserver(test: test, progress: progress, success: { (ob, resp) in
+                do {
+                    let image: UIImage = try JingDataNetworkDataParser.handle(resp: resp)
+                    ob.onNext(image as! R)
+                }
+                catch {
+                    self.handle(ob: ob, error: .parser(.image))
+                }
+            })
+        }
+        else if R.Type.self == JSON.Type.self {
+            return createGeneralObserver(test: test, progress: progress, success: { (ob, resp) in
+                do {
+                    let json: JSON = try JingDataNetworkDataParser.handle(data: resp.data)
+                    ob.onNext(json as! R)
+                }
+                catch let error as JingDataNetworkError {
+                    self.handle(ob: ob, error: error)
+                }
+                catch {}
+            })
+        }
+        else {
+            
+            return createGeneralObserver(test: test, progress: progress, success: { (ob, data) in
+                self.handle(ob: ob, error: .parser(.type))
+            })
+        }
+    }
+    
+    func createObserver<R: JingDataNetworkBaseResponse>(test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
+        return createGeneralObserver(test: test, progress: progress, success: { (ob, resp) in
+            do {
+                let model: R = try JingDataNetworkDataParser.handle(data: resp.data)
+                ob.onNext(model)
+            }
+            catch let error as JingDataNetworkError {
+                self.handle(ob: ob, error: error)
+            }
+            catch {}
+        })
+    }
+    
+    func createGeneralObserver<D>(test: Bool = false, progress: ProgressBlock? = nil, success: @escaping (AnyObserver<D>, Response) -> (), error: JingDataNetworkErrorCallback? = nil) -> Observable<D> {
+        let ob = Observable<D>.create { (ob) -> Disposable in
+            let cancellableToken = self.createRequest(test: test, progress: progress, success: { (resp) in
+                success(ob, resp)
+            }, error: { (error) in
+                self.handle(ob: ob, error: error)
+            })
+            
+            return Disposables.create {
+                cancellableToken.cancel()
+            }
+        }
+        return ob
+    }
+    
+    func createRequest(test: Bool = false, progress: ProgressBlock? = nil, success: @escaping (Response) -> (), error: JingDataNetworkErrorCallback? = nil) -> NetworkCancelWraper {
+        let provider = createProvider(test: test, networkManager: Manager.default, plugins: [])
+        let request = provider.request(self, callbackQueue: .global(), progress: progress) { (result) in
+            switch result {
+            case .failure(let e):
+                error?(.default(error: e))
+            case .success(let d):
+                do {
+                    let r = try d.filterSuccessfulStatusCodes()
+                    success(r)
+                }
+                catch let e as MoyaError {
+                    switch e {
+                    case .statusCode(let r):
+                        error?(.status(code: r.statusCode))
+                    default:
+                        ()
+                    }
+                }
+                catch {}
+            }
+        }
+        return NetworkCancelWraper(request)
+    }
+    
+    func createProvider(test: Bool, networkManager: Manager, plugins: [PluginType]) -> MoyaProvider<Self> {
+        let endpointClosure = { (target: TargetType) -> Endpoint in
+            let url = target.baseURL.appendingPathComponent(target.path).absoluteString
+            let endpoint = Endpoint(url: url, sampleResponseClosure: {.networkResponse(200, target.sampleData)}, method: target.method, task: target.task, httpHeaderFields: target.headers)
+            return endpoint
+        }
+        if test {
+            return MoyaProvider<Self>(endpointClosure: endpointClosure, stubClosure: { (target) -> StubBehavior in
+                return StubBehavior.immediate
+            }, manager: networkManager, plugins: plugins)
+        }
+        else {
+            return MoyaProvider<Self>.init(endpointClosure: endpointClosure, manager: networkManager, plugins: plugins)
+        }
+    }
+    
+    func handle<D>(ob: AnyObserver<D>, error: JingDataNetworkError) {
+        // C.handleJingDataNetworkError(error)
+        ob.onError(error)
+    }
+}
+
+
 
