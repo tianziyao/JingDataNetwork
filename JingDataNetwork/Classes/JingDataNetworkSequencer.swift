@@ -12,18 +12,18 @@ import RxSwift
 
 public typealias JingDataNetworkViodCallback = () -> ()
 
-public class JingDataNetworkSequencer<C: JingDataNetworkConfig> {
+public struct JingDataNetworkSequencer {
     
-    public static func sameModel<T: TargetType>() -> JingDataNetworkSameModelSequencer<T, C> {
-        return JingDataNetworkSameModelSequencer<T, C>()
+    public static func sameResponse<Handle: JingDataNetworkResponseHandler>() -> JingDataNetworkSameResponseSequencer<Handle> {
+        return JingDataNetworkSameResponseSequencer<Handle>()
     }
     
-    public static func differentModel() -> JingDataNetworkDifferentModelSequencer<C> {
-        return JingDataNetworkDifferentModelSequencer<C>()
+    public static func differentResponse() -> JingDataNetworkDifferentResponseSequencer {
+        return JingDataNetworkDifferentResponseSequencer()
     }
 }
 
-public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
+public class JingDataNetworkDifferentResponseSequencer {
     
     var blocks = [JingDataNetworkViodCallback]()
     let semaphore = DispatchSemaphore(value: 1)
@@ -33,72 +33,50 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
     var results = [Any]()
     var index: Int = 0
     
-    public func next<T: TargetType, N: JingDataNetworkBaseResponse, P>(with: @escaping (P) -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
+    public func next<C: JingDataNetworkResponseHandler, T: TargetType, P>(bind: C.Type? = nil, with: @escaping (P) -> T?, progress: ProgressBlock? = nil, success: @escaping (C.Response) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentResponseSequencer {
         let api: () -> T? = {
             guard let preData = self.data as? P else { return nil }
             return with(preData)
         }
-        return next(api: api, progress: progress, success: success, error: error, test: test)
+        return next(bind: bind, api: api, progress: progress, success: success, error: error, test: test)
     }
     
-    public func next<T: TargetType, N, P>(with: @escaping (P) -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
-        let api: () -> T? = {
-            guard let preData = self.data as? P else { return nil }
-            return with(preData)
-        }
-        return next(api: api, progress: progress, success: success, error: error, test: test)
-    }
-    
-    public func next<T: TargetType, N: JingDataNetworkBaseResponse>(api: @escaping () -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
+    public func next<C: JingDataNetworkResponseHandler, T: TargetType>(bind: C.Type? = nil, api: @escaping () -> T?, progress: ProgressBlock? = nil, success: @escaping (C.Response) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentResponseSequencer {
         let block: JingDataNetworkViodCallback = {
             guard let api = api() else {
                 self.requestSuccess = false
                 return
             }
             self.semaphore.wait()
-            JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-                .observeOn(MainScheduler.instance)
-                .subscribe(onNext: { [weak self] (data: N) in
-                    self?.data = data
-                    self?.results.append(data)
-                    self?.requestSuccess = true
-                    success(data)
+            JingDataNetworkManager.base(api: api).bind(C.self)
+            .single(progress: progress, test: test)
+            .observeOn(MainScheduler.instance)
+            .subscribe(onSuccess: { [weak self] (data) in
+                self?.data = data
+                self?.results.append(data)
+                self?.requestSuccess = true
+                success(data)
+                self?.semaphore.signal()
+                }, onError: { [weak self] (e) in
+                    self?.requestSuccess = false
+                    error?(e)
                     self?.semaphore.signal()
-                    }, onError: { [weak self] (e) in
-                        self?.requestSuccess = false
-                        error?(e)
-                        self?.semaphore.signal()
-                })
-                .disposed(by: self.bag)
-            self.semaphore.wait()
-            // print("xxxxxxxxx")
-            self.semaphore.signal()
-        }
-        blocks.append(block)
-        return self
-    }
-    
-    public func next<T: TargetType, N>(api: @escaping () -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
-        let block: JingDataNetworkViodCallback = {
-            guard let api = api() else {
-                self.requestSuccess = false
-                return
-            }
-            self.semaphore.wait()
-            JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-                .observeOn(MainScheduler.instance)
-                .subscribe(onNext: { [weak self] (data: N) in
-                    self?.data = data
-                    self?.results.append(data)
-                    self?.requestSuccess = true
-                    success(data)
-                    self?.semaphore.signal()
-                    }, onError: { [weak self] (e) in
-                        self?.requestSuccess = false
-                        error?(e)
-                        self?.semaphore.signal()
-                })
-                .disposed(by: self.bag)
+            })
+            .disposed(by: self.bag)
+//            JingDataNetworkManager<C>.base(api: api).observer(test: test, progress: progress)
+//                .observeOn(MainScheduler.instance)
+//                .subscribe(onNext: { [weak self] (data: N) in
+//                    self?.data = data
+//                    self?.results.append(data)
+//                    self?.requestSuccess = true
+//                    success(data)
+//                    self?.semaphore.signal()
+//                    }, onError: { [weak self] (e) in
+//                        self?.requestSuccess = false
+//                        error?(e)
+//                        self?.semaphore.signal()
+//                })
+//                .disposed(by: self.bag)
             self.semaphore.wait()
             // print("xxxxxxxxx")
             self.semaphore.signal()
@@ -109,7 +87,7 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
     
     public func run() -> PrimitiveSequence<SingleTrait, [Any]> {
         let ob = Single<[Any]>.create { (single) -> Disposable in
-            let queue = DispatchQueue(label: "\(JingDataNetworkDifferentModelSequencer.self)", qos: .default, attributes: .concurrent)
+            let queue = DispatchQueue(label: "\(JingDataNetworkDifferentResponseSequencer.self)", qos: .default, attributes: .concurrent)
             queue.async {
                 for i in 0 ..< self.blocks.count {
                     self.index = i
@@ -122,7 +100,6 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
                     single(.success(self.results))
                 }
                 else {
-                    C.handleJingDataNetworkError(.sequence(.break(index: self.index)))
                     single(.error(JingDataNetworkError.sequence(.break(index: self.index))))
                 }
                 self.requestFinish()
@@ -139,55 +116,37 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
         results.removeAll()
     }
 }
-
-public extension JingDataNetworkDifferentModelSequencer {
-    
-    public func observerOfzip<T: TargetType, R: JingDataNetworkBaseResponse>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
-        return JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-    }
-    
-    public func observerOfzip<T: TargetType, R>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
-        return JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-    }
-}
-
-public class JingDataNetworkSameModelSequencer<T: TargetType, C: JingDataNetworkConfig> {
+//
+//public extension JingDataNetworkDifferentModelSequencer {
+//    
+//    public func observerOfzip<T: TargetType, R: JingDataNetworkBaseResponse>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
+//        return JingDataNetworkManager<C>.base(api: api).observer(test: test, progress: progress)
+//    }
+//    
+//    public func observerOfzip<T: TargetType, R>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
+//        return JingDataNetworkManager<C>.base(api: api).observer(test: test, progress: progress)
+//    }
+//}
+//
+public struct JingDataNetworkSameResponseSequencer<Handle: JingDataNetworkResponseHandler> {
     
     public init () {}
     
-    public func zip<R: JingDataNetworkBaseResponse>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<[R]> {
-        var obs = [Observable<R>]()
+    public func zip(apis: [TargetType], progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, [Handle.Response]> {
+        var singles = [PrimitiveSequence<SingleTrait, Handle.Response>]()
         for api in apis {
-            let ob: Observable<R> = JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-            obs.append(ob)
+            let single = JingDataNetworkManager.base(api: api).bind(Handle.self).single(progress: progress, test: test)
+            singles.append(single)
         }
-        return Observable.zip(obs)
+        return Single.zip(singles)
     }
     
-    public func map<R: JingDataNetworkBaseResponse>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
-        var obs = [Observable<R>]()
+    public func map(apis: [TargetType], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<Handle.Response> {
+        var singles = [PrimitiveSequence<SingleTrait, Handle.Response>]()
         for api in apis {
-            let ob: Observable<R> = JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-            obs.append(ob)
+            let single = JingDataNetworkManager.base(api: api).bind(Handle.self).single(progress: progress, test: test)
+            singles.append(single)
         }
-        return Observable.from(obs).merge()
-    }
-    
-    public func zip<R>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<[R]> {
-        var obs = [Observable<R>]()
-        for api in apis {
-            let ob: Observable<R> = JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-            obs.append(ob)
-        }
-        return Observable.zip(obs)
-    }
-    
-    public func map<R>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
-        var obs = [Observable<R>]()
-        for api in apis {
-            let ob: Observable<R> = JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-            obs.append(ob)
-        }
-        return Observable.from(obs).merge()
+        return Observable.from(singles).merge()
     }
 }

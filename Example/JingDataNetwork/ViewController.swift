@@ -13,28 +13,28 @@ import JingDataNetwork
 import Moya
 import SwiftyJSON
 
-struct BaseNetworkConfig: JingDataNetworkConfig {
-    static var plugins: [PluginType] = []
-    
-    static var networkManager: Manager {
-        set {
-            
-        }
-        get {
-            let configuration = URLSessionConfiguration.default
-            configuration.httpAdditionalHeaders = Manager.defaultHTTPHeaders
-            configuration.timeoutIntervalForRequest = 15
-            configuration.timeoutIntervalForResource = 60
-            let manager = Manager(configuration: configuration)
-            manager.startRequestsImmediately = false
-            return manager
-        }
-    }
-    
-    static func handleJingDataNetworkError(_ error: JingDataNetworkError) {
-        print(error.description)
-    }
-}
+//struct BaseNetworkConfig: JingDataNetworkConfig {
+//    static var plugins: [PluginType] = []
+//
+//    static var networkManager: Manager {
+//        set {
+//
+//        }
+//        get {
+//            let configuration = URLSessionConfiguration.default
+//            configuration.httpAdditionalHeaders = Manager.defaultHTTPHeaders
+//            configuration.timeoutIntervalForRequest = 15
+//            configuration.timeoutIntervalForResource = 60
+//            let manager = Manager(configuration: configuration)
+//            manager.startRequestsImmediately = false
+//            return manager
+//        }
+//    }
+//
+//    static func handleJingDataNetworkError(_ error: JingDataNetworkError) {
+//        print(error.description)
+//    }
+//}
 
 class ViewController: UIViewController {
     
@@ -42,7 +42,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        next()
+        //next()
     }
     
     override func didReceiveMemoryWarning() {
@@ -51,107 +51,122 @@ class ViewController: UIViewController {
     }
     
     func base() {
-        JingDataNetworkManager<TestApi, BaseNetworkConfig>
-            .base(api: .n)
-            .observer(test: true, progress: { (data) in
-                print(data.progress)
-            })
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { (data: BaseResp<UserInfo>) in
-                print(data.code!)
-            }, onError: { (e) in
-                print(e as! JingDataNetworkError)
-            })
-            .disposed(by: bag)
+//        JingDataNetworkManager<BaseNetworkConfig>
+//            .base(api: TestApi.n)
+//            .observer(test: true, progress: { (data) in
+//                print(data.progress)
+//            })
+//            .observeOn(MainScheduler.instance)
+//            .subscribe(onNext: { (data: BaseResp<UserInfo>) in
+//                print(data.code!)
+//            }, onError: { (e) in
+//                print(e as! JingDataNetworkError)
+//            })
+//            .disposed(by: bag)
+//
+//        JingDataNetworkManager<BaseNetworkConfig>
+//            .base(api: TestApi.n)
+//            .observer(test: true, progress: { (data) in
+//                print(data.progress)
+//            })
+//            .observeOn(MainScheduler.instance)
+//            .subscribe(onNext: { (data: String) in
+//                print(data)
+//            }, onError: { (e) in
+//                print(e as! JingDataNetworkError)
+//            })
+//            .disposed(by: bag)
+//
+//        JingDataNetworkManager<BaseNetworkConfig>
+//            .base(api: TestApi.n)
+//            .observer(test: true, progress: { (data) in
+//                print(data.progress)
+//            })
+//            .observeOn(MainScheduler.instance)
+//            .subscribe(onNext: { (data: JSON) in
+//                print(data.arrayValue.count)
+//            }, onError: { (e) in
+//                print(e as! JingDataNetworkError)
+//            })
+//            .disposed(by: bag)
         
-        JingDataNetworkManager<TestApi, BaseNetworkConfig>
-            .base(api: .n)
-            .observer(test: true, progress: { (data) in
-                print(data.progress)
-            })
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { (data: String) in
-                print(data)
-            }, onError: { (e) in
-                print(e as! JingDataNetworkError)
-            })
-            .disposed(by: bag)
-        
-        JingDataNetworkManager<TestApi, BaseNetworkConfig>
-            .base(api: .n)
-            .observer(test: true, progress: { (data) in
-                print(data.progress)
-            })
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { (data: JSON) in
-                print(data.arrayValue.count)
-            }, onError: { (e) in
-                print(e as! JingDataNetworkError)
-            })
-            .disposed(by: bag)
-    }
-    
-    
-    func zip() {
-        JingDataNetworkSequencer<BaseNetworkConfig>.sameModel()
-            .zip(apis: [TestApi.m, .n], test: true)
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { (d: [BaseResp<UserInfo>]) in
-                print(Thread.current)
-                print(d.map { $0.data!.name! })
-            }).disposed(by: bag)
-    }
-    
-    func map() {
-        JingDataNetworkSequencer<BaseNetworkConfig>.sameModel()
-            .map(apis: [TestApi.m, .n], test: true)
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { (d: BaseResp<UserInfo>) in
-                print(Thread.current)
-                print(d.data!.name!)
-            }).disposed(by: bag)
-    }
-    
-    func next() {
-        JingDataNetworkSequencer<BaseNetworkConfig>.differentModel()
-            .next(api: { () -> TestApi? in
-                return .m
-            }, success: { (data: String) in
-                print(data)
-            }, error: { (error) in
-                print(error)
-            }, test: true)
-            .next(with: { (data: String) -> TestApi in
-                return .m
-            }, success: { (data: UserInfo) in
-                //print(data.data!.age!)
-            }, error: { (error) in
-                print(error)
-            }, test: true)
-            .run()
-            .observeOn(MainScheduler.instance)
-            .subscribe(onSuccess: { (result) in
-                print("success", Thread.current)
-            }) { (error) in
-                print(error)
-        }.disposed(by: bag)
-    }
-    
-    func wait() {
-        let o1: Observable<BaseResp<UserInfo>> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: TestApi.m, test: true)
-        let o2: Observable<BaseResp<UserInfo>> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: TestApi.n, test: true)
-        let o3: Observable<String> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: Test2Api.n, test: true)
-        let o4: Observable<BaseResp<UserInfo>> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: Test2Api.n, test: true)
-        Observable.zip(o1, o2, o3, o4)
+        JingDataNetworkManager.base(api: TestApi.m)
+        .bind(BaseRespHandler.self)
+        .single()
         .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { (str1, user1, str2, user2) in
-                print(Thread.current)
-                print(str1, user1, str2, user2)
-            }, onError: { (e) in
-                print(e)
+            .subscribe(onSuccess: { (data) in
+                print(data)
             })
         .disposed(by: bag)
     }
+    
+//    func zip() {
+//        JingDataNetworkSequencer<BaseNetworkConfig>.sameModel()
+//            .zip(apis: [TestApi.m, .n], test: true)
+//            .observeOn(MainScheduler.instance)
+//            .subscribe(onNext: { (d: [BaseResp<UserInfo>]) in
+//                print(Thread.current)
+//                print(d.map { $0.data!.name! })
+//            }).disposed(by: bag)
+//    }
+//
+//    func map() {
+//        JingDataNetworkSequencer<BaseNetworkConfig>.sameModel()
+//            .map(apis: [TestApi.m, .n], test: true)
+//            .observeOn(MainScheduler.instance)
+//            .subscribe(onNext: { (d: BaseResp<UserInfo>) in
+//                print(Thread.current)
+//                print(d.data!.name!)
+//            }).disposed(by: bag)
+//    }
+//
+    func next() {
+//        JingDataNetworkSequencer.differentResponse()
+//            .next(bind: BaseRespHandler.self, api: { () -> TestApi? in
+//                .m
+//            }, test: true, success: { (data) in
+//                print(data)
+//            })
+//        
+//        JingDataNetworkSequencer<BaseNetworkConfig>.differentModel()
+//            .next(api: { () -> TestApi? in
+//                return .m
+//            }, success: { (data: String) in
+//                print(data)
+//            }, error: { (error) in
+//                print(error)
+//            }, test: true)
+//            .next(with: { (data: String) -> TestApi in
+//                return .m
+//            }, success: { (data: UserInfo) in
+//                //print(data.data!.age!)
+//            }, error: { (error) in
+//                print(error)
+//            }, test: true)
+//            .run()
+//            .observeOn(MainScheduler.instance)
+//            .subscribe(onSuccess: { (result) in
+//                print("success", Thread.current)
+//            }) { (error) in
+//                print(error)
+//        }.disposed(by: bag)
+    }
+//
+//    func wait() {
+//        let o1: Observable<BaseResp<UserInfo>> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: TestApi.m, test: true)
+//        let o2: Observable<BaseResp<UserInfo>> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: TestApi.n, test: true)
+//        let o3: Observable<String> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: Test2Api.n, test: true)
+//        let o4: Observable<BaseResp<UserInfo>> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: Test2Api.n, test: true)
+//        Observable.zip(o1, o2, o3, o4)
+//        .observeOn(MainScheduler.instance)
+//            .subscribe(onNext: { (str1, user1, str2, user2) in
+//                print(Thread.current)
+//                print(str1, user1, str2, user2)
+//            }, onError: { (e) in
+//                print(e)
+//            })
+//        .disposed(by: bag)
+//    }
 
 }
 
