@@ -13,17 +13,52 @@ import RxSwift
 public typealias JingDataNetworkViodCallback = () -> ()
 
 public struct JingDataNetworkSequencer {
+    public static var differentHandlerMap = JingDataNetworkDifferentMapHandlerSequencer()
+    public static var differentHandlerZip = JingDataNetworkDifferentZipHandlerSequencer()
     
-    public static func sameResponse<Handle: JingDataNetworkResponseHandler>() -> JingDataNetworkSameResponseSequencer<Handle> {
-        return JingDataNetworkSameResponseSequencer<Handle>()
-    }
-    
-    public static func differentResponse() -> JingDataNetworkDifferentResponseSequencer {
-        return JingDataNetworkDifferentResponseSequencer()
+    public static func sameHandler<Handler: JingDataNetworkResponseHandler>(_ bind: Handler.Type) -> JingDataNetworkSameHandlerSequencer<Handler> {
+        return JingDataNetworkSameHandlerSequencer()
     }
 }
 
-public class JingDataNetworkDifferentResponseSequencer {
+public protocol JingDataNetworkTaskInterface {
+    associatedtype Handler: JingDataNetworkResponseHandler
+    var api: TargetType { get }
+    var handler: Handler.Type { get }
+    init(api: TargetType, handler: Handler.Type)
+    func single(progress: ProgressBlock?, test: Bool) -> PrimitiveSequence<SingleTrait, Handler.Response>
+}
+
+public struct JingDataNetworkTask<H: JingDataNetworkResponseHandler>: JingDataNetworkTaskInterface {
+    
+    public var api: TargetType
+    public var handler: H.Type
+    
+    public init(api: TargetType, handler: Handler.Type) {
+        self.api = api
+        self.handler = handler
+    }
+    
+    public func single(progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, H.Response> {
+        return JingDataNetworkManager.base(api: api).bind(handler).single(progress: progress, test: test)
+    }
+}
+
+
+public struct JingDataNetworkDifferentZipHandlerSequencer {
+    
+    public init() {}
+    
+    public func zip<H1: JingDataNetworkResponseHandler, H2: JingDataNetworkResponseHandler, H3: JingDataNetworkResponseHandler>(_ source1: JingDataNetworkTask<H1>, _ source2: JingDataNetworkTask<H2>, _ source3: JingDataNetworkTask<H3>) -> PrimitiveSequence<SingleTrait, (H1.Response, H2.Response, H3.Response)> {
+        return Single.zip(source1.single(), source2.single(), source3.single())
+    }
+    
+    public func zip<H1: JingDataNetworkResponseHandler, H2: JingDataNetworkResponseHandler>(_ source1: JingDataNetworkTask<H1>, _ source2: JingDataNetworkTask<H2>) -> PrimitiveSequence<SingleTrait, (H1.Response, H2.Response)> {
+        return Single.zip(source1.single(), source2.single())
+    }
+}
+
+public class JingDataNetworkDifferentMapHandlerSequencer {
     
     var blocks = [JingDataNetworkViodCallback]()
     let semaphore = DispatchSemaphore(value: 1)
@@ -33,7 +68,10 @@ public class JingDataNetworkDifferentResponseSequencer {
     var results = [Any]()
     var index: Int = 0
     
-    public func next<C: JingDataNetworkResponseHandler, T: TargetType, P>(bind: C.Type? = nil, with: @escaping (P) -> T?, progress: ProgressBlock? = nil, success: @escaping (C.Response) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentResponseSequencer {
+    public init() {}
+    
+    @discardableResult
+    public func next<C: JingDataNetworkResponseHandler, T: TargetType, P>(bind: C.Type, with: @escaping (P) -> T?, progress: ProgressBlock? = nil, success: @escaping (C.Response) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentMapHandlerSequencer {
         let api: () -> T? = {
             guard let preData = self.data as? P else { return nil }
             return with(preData)
@@ -41,7 +79,8 @@ public class JingDataNetworkDifferentResponseSequencer {
         return next(bind: bind, api: api, progress: progress, success: success, error: error, test: test)
     }
     
-    public func next<C: JingDataNetworkResponseHandler, T: TargetType>(bind: C.Type? = nil, api: @escaping () -> T?, progress: ProgressBlock? = nil, success: @escaping (C.Response) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentResponseSequencer {
+    @discardableResult
+    public func next<C: JingDataNetworkResponseHandler, T: TargetType>(bind: C.Type, api: @escaping () -> T?, progress: ProgressBlock? = nil, success: @escaping (C.Response) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentMapHandlerSequencer {
         let block: JingDataNetworkViodCallback = {
             guard let api = api() else {
                 self.requestSuccess = false
@@ -63,20 +102,7 @@ public class JingDataNetworkDifferentResponseSequencer {
                     self?.semaphore.signal()
             })
             .disposed(by: self.bag)
-//            JingDataNetworkManager<C>.base(api: api).observer(test: test, progress: progress)
-//                .observeOn(MainScheduler.instance)
-//                .subscribe(onNext: { [weak self] (data: N) in
-//                    self?.data = data
-//                    self?.results.append(data)
-//                    self?.requestSuccess = true
-//                    success(data)
-//                    self?.semaphore.signal()
-//                    }, onError: { [weak self] (e) in
-//                        self?.requestSuccess = false
-//                        error?(e)
-//                        self?.semaphore.signal()
-//                })
-//                .disposed(by: self.bag)
+
             self.semaphore.wait()
             // print("xxxxxxxxx")
             self.semaphore.signal()
@@ -87,7 +113,7 @@ public class JingDataNetworkDifferentResponseSequencer {
     
     public func run() -> PrimitiveSequence<SingleTrait, [Any]> {
         let ob = Single<[Any]>.create { (single) -> Disposable in
-            let queue = DispatchQueue(label: "\(JingDataNetworkDifferentResponseSequencer.self)", qos: .default, attributes: .concurrent)
+            let queue = DispatchQueue(label: "\(JingDataNetworkDifferentMapHandlerSequencer.self)", qos: .default, attributes: .concurrent)
             queue.async {
                 for i in 0 ..< self.blocks.count {
                     self.index = i
@@ -115,36 +141,29 @@ public class JingDataNetworkDifferentResponseSequencer {
         blocks.removeAll()
         results.removeAll()
     }
+    
+    deinit {
+        debugPrint("\(#file) \(#function)")
+    }
 }
-//
-//public extension JingDataNetworkDifferentModelSequencer {
-//    
-//    public func observerOfzip<T: TargetType, R: JingDataNetworkBaseResponse>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
-//        return JingDataNetworkManager<C>.base(api: api).observer(test: test, progress: progress)
-//    }
-//    
-//    public func observerOfzip<T: TargetType, R>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
-//        return JingDataNetworkManager<C>.base(api: api).observer(test: test, progress: progress)
-//    }
-//}
-//
-public struct JingDataNetworkSameResponseSequencer<Handle: JingDataNetworkResponseHandler> {
+
+public struct JingDataNetworkSameHandlerSequencer<Handler: JingDataNetworkResponseHandler> {
     
     public init () {}
     
-    public func zip(apis: [TargetType], progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, [Handle.Response]> {
-        var singles = [PrimitiveSequence<SingleTrait, Handle.Response>]()
+    public func zip(apis: [TargetType], progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, [Handler.Response]> {
+        var singles = [PrimitiveSequence<SingleTrait, Handler.Response>]()
         for api in apis {
-            let single = JingDataNetworkManager.base(api: api).bind(Handle.self).single(progress: progress, test: test)
+            let single = JingDataNetworkManager.base(api: api).bind(Handler.self).single(progress: progress, test: test)
             singles.append(single)
         }
         return Single.zip(singles)
     }
     
-    public func map(apis: [TargetType], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<Handle.Response> {
-        var singles = [PrimitiveSequence<SingleTrait, Handle.Response>]()
+    public func map(apis: [TargetType], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<Handler.Response> {
+        var singles = [PrimitiveSequence<SingleTrait, Handler.Response>]()
         for api in apis {
-            let single = JingDataNetworkManager.base(api: api).bind(Handle.self).single(progress: progress, test: test)
+            let single = JingDataNetworkManager.base(api: api).bind(Handler.self).single(progress: progress, test: test)
             singles.append(single)
         }
         return Observable.from(singles).merge()

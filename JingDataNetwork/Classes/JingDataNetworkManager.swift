@@ -46,8 +46,6 @@ public enum JingDataNetworkManager {
     }
 }
 
-
-
 public struct JingDataNetworkListDataObserver<C: JingDataNetworkListDataResponseHandler> {
     
     var api: TargetType

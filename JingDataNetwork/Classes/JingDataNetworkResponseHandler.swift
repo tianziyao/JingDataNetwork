@@ -67,17 +67,6 @@ public extension JingDataNetworkDataResponseHandler {
     }
 }
 
-//
-//public protocol JingDataNetworkListDataResponse {
-//    associatedtype Data
-//    var listData: [Data] { set get }
-//}
-//
-
-//
-//public protocol JingDataNetworkListDataResponseHandler: JingDataNetworkResponseHandler where Response: JingDataNetworkListDataResponse {}
-
-
 public protocol JingDataNetworkListDataResponse {
     associatedtype ItemData
     var listData: [ItemData] { set get }
