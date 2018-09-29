@@ -13,36 +13,13 @@ import JingDataNetwork
 import Moya
 import SwiftyJSON
 
-//struct BaseNetworkConfig: JingDataNetworkConfig {
-//    static var plugins: [PluginType] = []
-//
-//    static var networkManager: Manager {
-//        set {
-//
-//        }
-//        get {
-//            let configuration = URLSessionConfiguration.default
-//            configuration.httpAdditionalHeaders = Manager.defaultHTTPHeaders
-//            configuration.timeoutIntervalForRequest = 15
-//            configuration.timeoutIntervalForResource = 60
-//            let manager = Manager(configuration: configuration)
-//            manager.startRequestsImmediately = false
-//            return manager
-//        }
-//    }
-//
-//    static func handleJingDataNetworkError(_ error: JingDataNetworkError) {
-//        print(error.description)
-//    }
-//}
-
 class ViewController: UIViewController {
     
     var bag = DisposeBag()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        //next()
+        base()
     }
     
     override func didReceiveMemoryWarning() {
@@ -91,13 +68,31 @@ class ViewController: UIViewController {
 //            .disposed(by: bag)
         
         JingDataNetworkManager.base(api: TestApi.m)
-        .bind(BaseRespHandler.self)
+        .bind(BaseResponseHandler.self)
         .single()
         .observeOn(MainScheduler.instance)
+            .subscribe(onSuccess: { (response) in
+                print(response)
+            })
+        .disposed(by: bag)
+        
+        JingDataNetworkManager.base(api: TestApi.m)
+            .bind(BaseDataResponseHandler<BaseDataResponse>.self)
+            .single()
+            .observeOn(MainScheduler.instance)
             .subscribe(onSuccess: { (data) in
                 print(data)
             })
-        .disposed(by: bag)
+            .disposed(by: bag)
+        
+        JingDataNetworkManager.base(api: TestApi.m)
+            .bind(BaseListDataResponseHandler<BaseListDataResponse>.self)
+            .single()
+            .observeOn(MainScheduler.instance)
+            .subscribe(onSuccess: { (listData) in
+                print(listData)
+            })
+            .disposed(by: bag)
     }
     
 //    func zip() {

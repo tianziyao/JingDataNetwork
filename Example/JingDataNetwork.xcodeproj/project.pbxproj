@@ -14,7 +14,9 @@
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
-		94BEDDFC213666D400548A0B /* BaseResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BEDDFB213666D400548A0B /* BaseResponse.swift */; };
+		947D493B215F574E00107DE6 /* BaseDataResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947D493A215F574E00107DE6 /* BaseDataResponseHandler.swift */; };
+		947D493D215F7D9500107DE6 /* BaseListDataResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947D493C215F7D9500107DE6 /* BaseListDataResponseHandler.swift */; };
+		94BEDDFC213666D400548A0B /* BaseResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BEDDFB213666D400548A0B /* BaseResponseHandler.swift */; };
 		94BEDE002136672800548A0B /* Api.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BEDDFF2136672800548A0B /* Api.swift */; };
 /* End PBXBuildFile section */
 
@@ -43,7 +45,9 @@
 		653E21601DBCDAE4F9FE7F55 /* Pods-JingDataNetwork_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JingDataNetwork_Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JingDataNetwork_Example/Pods-JingDataNetwork_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		6CED06F218C789094772ADD1 /* Pods_JingDataNetwork_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_JingDataNetwork_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FFF0338E9F748E9236D238B /* Pods_JingDataNetwork_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_JingDataNetwork_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		94BEDDFB213666D400548A0B /* BaseResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseResponse.swift; sourceTree = "<group>"; };
+		947D493A215F574E00107DE6 /* BaseDataResponseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseDataResponseHandler.swift; sourceTree = "<group>"; };
+		947D493C215F7D9500107DE6 /* BaseListDataResponseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseListDataResponseHandler.swift; sourceTree = "<group>"; };
+		94BEDDFB213666D400548A0B /* BaseResponseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseResponseHandler.swift; sourceTree = "<group>"; };
 		94BEDDFF2136672800548A0B /* Api.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Api.swift; sourceTree = "<group>"; };
 		9892194C9CBA000DF95B4AC9 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		E2AA56241042010DE709ECD9 /* Pods-JingDataNetwork_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JingDataNetwork_Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-JingDataNetwork_Example/Pods-JingDataNetwork_Example.release.xcconfig"; sourceTree = "<group>"; };
@@ -153,7 +157,9 @@
 		94BEDDFD213666F700548A0B /* Network */ = {
 			isa = PBXGroup;
 			children = (
-				94BEDDFB213666D400548A0B /* BaseResponse.swift */,
+				94BEDDFB213666D400548A0B /* BaseResponseHandler.swift */,
+				947D493A215F574E00107DE6 /* BaseDataResponseHandler.swift */,
+				947D493C215F7D9500107DE6 /* BaseListDataResponseHandler.swift */,
 			);
 			name = Network;
 			sourceTree = "<group>";
@@ -288,7 +294,6 @@
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/JingDataNetwork/JingDataNetwork.framework",
 				"${BUILT_PRODUCTS_DIR}/Moya/Moya.framework",
-				"${BUILT_PRODUCTS_DIR}/ObjectMapper/ObjectMapper.framework",
 				"${BUILT_PRODUCTS_DIR}/Result/Result.framework",
 				"${BUILT_PRODUCTS_DIR}/RxCocoa/RxCocoa.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
@@ -299,7 +304,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/JingDataNetwork.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Moya.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ObjectMapper.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Result.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxCocoa.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxSwift.framework",
@@ -335,7 +339,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				94BEDDFC213666D400548A0B /* BaseResponse.swift in Sources */,
+				947D493B215F574E00107DE6 /* BaseDataResponseHandler.swift in Sources */,
+				94BEDDFC213666D400548A0B /* BaseResponseHandler.swift in Sources */,
+				947D493D215F7D9500107DE6 /* BaseListDataResponseHandler.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				94BEDE002136672800548A0B /* Api.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,

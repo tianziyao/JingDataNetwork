@@ -8,20 +8,13 @@
 import Foundation
 import Moya
 
-public enum JingDataNetworkParserError {
-    case json
-    case model
-    case type
-    case string
-    case image
-}
 
 public enum JingDataNetworkSequenceError {
     case `break`(index: Int)
 }
 
 public enum JingDataNetworkError: Error {
-    case parser(JingDataNetworkParserError)
+    case parser(type: String)
     case custom(code: Int)
     case status(code: Int)
     case sequence(JingDataNetworkSequenceError)

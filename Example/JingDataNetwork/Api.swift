@@ -8,21 +8,20 @@
 
 import Foundation
 import Moya
-import ObjectMapper
 import SwiftyJSON
 
-struct UserInfo: Mappable {
-    
-    var age: Int?
-    var name: String?
-    
-    init?(map: Map) {}
-    
-    mutating func mapping(map: Map) {
-        age <- map["age"]
-        name <- map["name"]
-    }
-}
+//struct UserInfo: Mappable {
+//    
+//    var age: Int?
+//    var name: String?
+//    
+//    init?(map: Map) {}
+//    
+//    mutating func mapping(map: Map) {
+//        age <- map["age"]
+//        name <- map["name"]
+//    }
+//}
 
 
 enum Test2Api: TargetType {

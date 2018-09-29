@@ -22,9 +22,6 @@
     "Moya/RxSwift": [
       "~> 11.0"
     ],
-    "ObjectMapper": [
-      "~> 3.3"
-    ],
     "RxSwift": [
       "~> 4.0"
     ],
