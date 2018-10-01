@@ -372,9 +372,9 @@ public struct JingDataNetworkSameHandlerSequencer<Handler: JingDataNetworkRespon
 
 
 
-##不同 Response
+## 不同 Response
 
-###顺序请求
+### 顺序请求
 
 不同的模型相对复杂，因为它意味着不同的后台或解析规则，同时，顺序请求时，又要求可以获取上一次请求的结果，顺序请求完成时，又可以取得最终的请求结果。
 
