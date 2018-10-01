@@ -16,7 +16,6 @@ struct BaseDataResponse: JingDataNetworkDataResponse {
     var code: Int = 0
     
     init?(_ data: Data) {
-        guard let str = String.init(data: data, encoding: .utf8) else { return nil }
         self.data = "str"
         self.code = 0
     }
@@ -31,8 +30,8 @@ struct BaseDataResponse: JingDataNetworkDataResponse {
     }
 }
 
-struct BaseDataResponseHandler<Response: JingDataNetworkDataResponse>: JingDataNetworkDataResponseHandler {
-    var response: Response?
+struct BaseDataResponseHandler<R: JingDataNetworkDataResponse>: JingDataNetworkDataResponseHandler {
+    var response: R?
 }
 
 

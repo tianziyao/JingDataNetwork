@@ -25,21 +25,27 @@ public protocol JingDataNetworkTaskInterface {
     associatedtype Handler: JingDataNetworkResponseHandler
     var api: TargetType { get }
     var handler: Handler.Type { get }
-    init(api: TargetType, handler: Handler.Type)
-    func single(progress: ProgressBlock?, test: Bool) -> PrimitiveSequence<SingleTrait, Handler.Response>
+    var progress: ProgressBlock? { get }
+    var test: Bool { get }
+    init(api: TargetType, handler: Handler.Type, progress: ProgressBlock?, test: Bool)
+    func single() -> PrimitiveSequence<SingleTrait, Handler.Response>
 }
 
 public struct JingDataNetworkTask<H: JingDataNetworkResponseHandler>: JingDataNetworkTaskInterface {
     
     public var api: TargetType
     public var handler: H.Type
+    public var progress: ProgressBlock? = nil
+    public var test: Bool = false
     
-    public init(api: TargetType, handler: Handler.Type) {
+    public init(api: TargetType, handler: Handler.Type, progress: ProgressBlock? = nil, test: Bool = false) {
         self.api = api
         self.handler = handler
+        self.progress = progress
+        self.test = test
     }
     
-    public func single(progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, H.Response> {
+    public func single() -> PrimitiveSequence<SingleTrait, H.Response> {
         return JingDataNetworkManager.base(api: api).bind(handler).single(progress: progress, test: test)
     }
 }

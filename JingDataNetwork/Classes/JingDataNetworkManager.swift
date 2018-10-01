@@ -24,39 +24,39 @@ public enum JingDataNetworkManager {
     
     case base(api: TargetType)
     
-    public func bind<C: JingDataNetworkResponseHandler>(_ type: C.Type) -> JingDataNetworkResponseObserver<C> {
+    public func bind<Handler: JingDataNetworkResponseHandler>(_ type: Handler.Type) -> JingDataNetworkResponseObserver<Handler> {
         switch self {
         case .base(let api):
-            return JingDataNetworkResponseObserver<C>(api: api)
+            return JingDataNetworkResponseObserver<Handler>(api: api)
         }
     }
     
-    public func bind<C: JingDataNetworkDataResponseHandler>(_ type: C.Type) -> JingDataNetworkDataObserver<C> {
+    public func bind<Handler: JingDataNetworkDataResponseHandler>(_ type: Handler.Type) -> JingDataNetworkDataObserver<Handler> {
         switch self {
         case .base(let api):
-            return JingDataNetworkDataObserver<C>(api: api)
+            return JingDataNetworkDataObserver<Handler>(api: api)
         }
     }
 
-    public func bind<C: JingDataNetworkListDataResponseHandler>(_ type: C.Type) -> JingDataNetworkListDataObserver<C> {
+    public func bind<Handler: JingDataNetworkListDataResponseHandler>(_ type: Handler.Type) -> JingDataNetworkListDataObserver<Handler> {
         switch self {
         case .base(let api):
-            return JingDataNetworkListDataObserver<C>(api: api)
+            return JingDataNetworkListDataObserver<Handler>(api: api)
         }
     }
 }
 
-public struct JingDataNetworkListDataObserver<C: JingDataNetworkListDataResponseHandler> {
+public struct JingDataNetworkListDataObserver<Handler: JingDataNetworkListDataResponseHandler> {
     
     var api: TargetType
     
-    public func single(progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, [C.Response.ItemData]> {
+    public func single(progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, [Handler.Response.ItemData]> {
         return createSingle(api: api, progress: progress, test: test)
     }
     
-    func createSingle(api: TargetType, progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, [C.Response.ItemData]> {
-        let single = Single<[C.Response.ItemData]>.create { (single) -> Disposable in
-            var responseHandle = C.init()
+    func createSingle(api: TargetType, progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, [Handler.Response.ItemData]> {
+        let single = Single<[Handler.Response.ItemData]>.create { (single) -> Disposable in
+            var responseHandle = Handler.init()
             let cancellableToken: NetworkCancelWraper = api.createRequest(networkManager: responseHandle.networkManager, plugins: responseHandle.plugins, progress: progress, success: { (resp) in
                 do {
                     let response = try responseHandle.makeResponse(resp.data)
@@ -84,17 +84,17 @@ public struct JingDataNetworkListDataObserver<C: JingDataNetworkListDataResponse
     }
 }
 
-public struct JingDataNetworkDataObserver<C: JingDataNetworkDataResponseHandler> {
+public struct JingDataNetworkDataObserver<Handler: JingDataNetworkDataResponseHandler> {
 
     var api: TargetType
 
-    public func single(progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, C.Response.DataSource> {
+    public func single(progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, Handler.Response.DataSource> {
         return createSingle(api: api, progress: progress, test: test)
     }
 
-    func createSingle(api: TargetType, progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, C.Response.DataSource> {
-        let single = Single<C.Response.DataSource>.create { (single) -> Disposable in
-            var responseHandle = C.init()
+    func createSingle(api: TargetType, progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, Handler.Response.DataSource> {
+        let single = Single<Handler.Response.DataSource>.create { (single) -> Disposable in
+            var responseHandle = Handler.init()
             let cancellableToken: NetworkCancelWraper = api.createRequest(networkManager: responseHandle.networkManager, plugins: responseHandle.plugins, progress: progress, success: { (resp) in
                 do {
                     let response = try responseHandle.makeResponse(resp.data)
@@ -122,17 +122,17 @@ public struct JingDataNetworkDataObserver<C: JingDataNetworkDataResponseHandler>
     }
 }
 
-public struct JingDataNetworkResponseObserver<C: JingDataNetworkResponseHandler> {
+public struct JingDataNetworkResponseObserver<Handler: JingDataNetworkResponseHandler> {
     
     var api: TargetType
 
-    public func single(progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, C.Response> {
+    public func single(progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, Handler.Response> {
         return createSingle(api: api, progress: progress, test: test)
     }
     
-    func createSingle(api: TargetType, progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, C.Response> {
-        let single = Single<C.Response>.create { (single) -> Disposable in
-            var responseHandle = C.init()
+    func createSingle(api: TargetType, progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, Handler.Response> {
+        let single = Single<Handler.Response>.create { (single) -> Disposable in
+            var responseHandle = Handler.init()
             let cancellableToken: NetworkCancelWraper = api.createRequest(networkManager: responseHandle.networkManager, plugins: responseHandle.plugins, progress: progress, success: { (resp) in
                 do {
                     let response = try responseHandle.makeResponse(resp.data)

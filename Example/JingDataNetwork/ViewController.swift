@@ -29,30 +29,33 @@ class ViewController: UIViewController {
     
     func base() {
         
+        // 获取 response
         JingDataNetworkManager.base(api: TestApi.m)
-        .bind(BaseResponseHandler.self)
-        .single()
-        .observeOn(MainScheduler.instance)
+            .bind(BaseResponseHandler.self)
+            .single()
+            .observeOn(MainScheduler.instance)
             .subscribe(onSuccess: { (response) in
                 print(response)
             })
-        .disposed(by: bag)
+            .disposed(by: bag)
         
+        // 获取 response.data
         JingDataNetworkManager.base(api: TestApi.m)
             .bind(BaseDataResponseHandler<BaseDataResponse>.self)
             .single()
             .observeOn(MainScheduler.instance)
             .subscribe(onSuccess: { (data) in
-                print(data)
+                print(data.count)
             })
             .disposed(by: bag)
         
+        // 获取 response.listData
         JingDataNetworkManager.base(api: TestApi.m)
             .bind(BaseListDataResponseHandler<BaseListDataResponse>.self)
             .single()
             .observeOn(MainScheduler.instance)
             .subscribe(onSuccess: { (listData) in
-                print(listData)
+                print(listData.count)
             })
             .disposed(by: bag)
     }
@@ -104,6 +107,7 @@ class ViewController: UIViewController {
         sequencer.zip(task1, task2).subscribe(onSuccess: { (data1, data2) in
             print(data1, data2)
         }).disposed(by: bag)
+        
     }
 }
 

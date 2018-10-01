@@ -73,108 +73,90 @@ Network 内部获取 `code` 从而判断请求状态。进行统一的处理，�
 
 进行输出，同时可以在 Network 的内部对请求结果进行统一的处理。且应该支持类与结构体。
 
-下面我给大家介绍一个网络请求组件，在这个组件中，依赖了以下几个优秀的开源工具，其具体使用不再细表：
+
+
+## JingDataNetwork
+
+下面让我们通过一个已经实现的网络请求组件，尝试解决和讨论以上的问题。此组件由以下四部分组成。
+
+```
+.
+├── JingDataNetworkError.swift
+├── JingDataNetworkManager.swift
+├── JingDataNetworkResponseHandler.swift
+└── JingDataNetworkSequencer.swift
+```
+
+在这个组件中，依赖了以下几个优秀的开源工具，其具体使用不再细表：
 
 ```
   ## 网络请求
-  s.dependency 'Moya', '~> 11.0' 
-  ## 模型解析
-  s.dependency 'ObjectMapper', '~> 3.3'		
+  s.dependency 'Moya', '~> 11.0' 	
   ## 响应式
   s.dependency 'RxSwift',    '~> 4.0'
   s.dependency 'RxCocoa',    '~> 4.0'
-  ## JSON数据处理
-  s.dependency 'SwiftyJSON',    '~> 4.0'
 ```
 
 
 
-### 如何针对不同后台进行设置
+## 如何针对不同后台进行设置
 
- `JingDataNetworkConfig` 顾名思义。是全局的配置项。
+针对每一种后台，或者同一个后台返回的不同结构的响应，我们将其视为一种 `Response `，通过 `JingDataNetworkResponseHandler ` 来处理一个 `Response`。
+
+```swift
+public protocol JingDataNetworkResponseHandler {
+    associatedtype Response
+    var response: Response? { set get }
+    var networkManager: Manager { get }
+    var plugins: [PluginType] { get }
+    func makeResponse(_ data: Data) throws -> Response
+    func makeCustomJingDataNetworkError() -> JingDataNetworkError?
+    func handleJingDataNetworkError(_ error: JingDataNetworkError)
+    init()
+}
+
+public extension JingDataNetworkResponseHandler {
+    var networkManager: Manager {
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = Manager.defaultHTTPHeaders
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 60
+        let manager = Manager(configuration: configuration)
+        manager.startRequestsImmediately = false
+        return manager
+    }
+    var plugins: [PluginType] {
+        return []
+    }
+}
+```
+
+每一种 `ResponseHandler` 要求其具备提供 `networkManager`，`plugins` 网络请求基础能力。同时具备完成 `Data` 到 `Response` 映射、抛出自定义错误和处理全局错误的能力。
 
 其中 `plugins` 是 `Moya` 的插件机制，可以实现 log、缓存等功能。
 
-`static func handleJingDataNetworkError(_ error: JingDataNetworkError)` 则是处理全局请求异常的地方。
-
-当声明一个 Network 时，需要传入此协议的实现。
-
-```swift
-public protocol JingDataNetworkConfig {
-    static var networkManager: Manager { set get }
-    static var plugins: [PluginType] { set get }
-    static func handleJingDataNetworkError(_ error: JingDataNetworkError)
-}
-```
 
 
+### 如何实现 Data 到 Response 的映射
 
-### 如何实现接收任意模型（解析规则）
-
-首先需要定义 `BaseResponse` 协议，协议继承了 `Mappable`，`Mappable` 是 `ObjectMapper` 中的一项协议，实现了 
-
-`ObjectMapper` 协议的类或结构体，才可以进行解析。
-
-`associatedtype DataSource` 表示此协议关联了一个泛型。它的作用稍后会讲到。
-
-`func makeCustomJingDataError() -> JingDataNetworkError?` 是用于制作模型解析成功后的状态错误。
+实现 `JingDataNetworkResponseHandler` 协议让如何完成解析变得相当清晰。
 
 ```swift
-public protocol JingDataNetworkBaseResponse: Mappable {
-    associatedtype DataSource
-    func makeCustomJingDataError() -> JingDataNetworkError?
-}
-```
-
-
-
-### 如何实现解析任意的模型
-
-在此方法中，利用泛型约束了一个 `JingDataNetworkBaseResponse` 类型，并规范返回的结果也是此类型，然后将
-
-这个类型传递给 `JingDataNetworkDataParser`。
-
-```swift
-func createObserver<R: JingDataNetworkBaseResponse>(api: T, test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
-    return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
-        do {
-            let model: R = try JingDataNetworkDataParser.handle(data: resp.data)
-            ob.onNext(model)
-        }
-        catch let error as JingDataNetworkError {
-            self.handle(ob: ob, error: error)
-        }
-        catch {}
-    })
-}
-```
-
-在 ``JingDataNetworkDataParser`` 方法中同样传入泛型，并将这个类型传递给 `JingDataNetworkResponseBuilder`。
-
-在这个过程中 `response.makeCustomJingDataError()` 方法可以抛出一个错误交给全局和回调处理。
-
-```swift
-public static func handle<R: JingDataNetworkBaseResponse>(data: Data) throws -> R {
-    guard let JSONString = String.init(data: data, encoding: .utf8) else {
-        throw JingDataNetworkError.parser(.string)
+struct BaseResponseHandler: JingDataNetworkResponseHandler {
+    
+    var response: String?
+    
+    func makeResponse(_ data: Data) throws -> String {
+         return String.init(data: data, encoding: .utf8) ?? "unknow"
     }
-    guard let response: R = JingDataNetworkResponseBuilder.create(by: JSONString) else {
-        throw JingDataNetworkError.parser(.model)
+    
+    func makeCustomJingDataNetworkError() -> JingDataNetworkError? {
+        return nil
     }
-    if let customError = response.makeCustomJingDataError() {
-        throw customError
+    
+    func handleJingDataNetworkError(_ error: JingDataNetworkError) {
+
     }
-    return response
-
-```
-
-最终由下面的方法，利用 `ObjectMapper` 进行解析。
-
-```swift
-public static func create<R: Mappable>(by JSONString: String) -> R? {
-    let mapperModel = Mapper<R>()
-    let object = mapperModel.map(JSONString: JSONString)
-    return object
 }
 ```
 
@@ -182,175 +164,148 @@ public static func create<R: Mappable>(by JSONString: String) -> R? {
 
 ### 如何实现解析任意的类型
 
-对泛型不进行约束，判断泛型的类型尝试解析。如无法解析则进入全局错误处理和错误回调。
+看到这里你可能会有疑惑，`Response` 每有一个类型都需要重新实现一个 `JingDataNetworkResponseHandler` 吗？这样会不会太繁琐了？
+
+是这样的。这个问题可以通过对 `JingDataNetworkResponseHandler` 泛型化进行解决：
 
 ```swift
-func createObserver<R>(api: T, test: Bool = false, progress: ProgressBlock? = nil) -> Observable<R> {
+struct BaseTypeResponseHandler<R>: JingDataNetworkResponseHandler {
+    
+    var response: R?
+    
+    func makeResponse(_ data: Data) throws -> R {
         if R.Type.self == String.Type.self {
-            return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
-                do {
-                    let string: String = try JingDataNetworkDataParser.handle(resp: resp)
-                    ob.onNext(string as! R)
-                }
-                catch let error as JingDataNetworkError {
-                    self.handle(ob: ob, error: error)
-                }
-                catch {}
-            })
+            throw JingDataNetworkError.parser(type: "\(R.Type.self)")
         }
         else if R.Type.self == Data.Type.self {
-            return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
-                ob.onNext(resp.data as! R)
-            })
+            throw JingDataNetworkError.parser(type: "\(R.Type.self)")
         }
         else if R.Type.self == UIImage.Type.self {
-            return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
-                do {
-                    let image: UIImage = try JingDataNetworkDataParser.handle(resp: resp)
-                    ob.onNext(image as! R)
-                }
-                catch {
-                    self.handle(ob: ob, error: .parser(.image))
-                }
-            })
-        }
-        else if R.Type.self == JSON.Type.self {
-            return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, resp) in
-                do {
-                    let json: JSON = try JingDataNetworkDataParser.handle(data: resp.data)
-                    ob.onNext(json as! R)
-                }
-                catch let error as JingDataNetworkError {
-                    self.handle(ob: ob, error: error)
-                }
-                catch {}
-            })
+            throw JingDataNetworkError.parser(type: "\(R.Type.self)")
         }
         else {
-            
-            return createGeneralObserver(api: api, test: test, progress: progress, success: { (ob, data) in
-                self.handle(ob: ob, error: .parser(.type))
+            throw JingDataNetworkError.parser(type: "\(R.Type.self)")
+        }
+    }
+    
+    func makeCustomJingDataNetworkError() -> JingDataNetworkError? {
+        return nil
+    }
+    
+    func handleJingDataNetworkError(_ error: JingDataNetworkError) {
+        
+    }
+}
+```
+
+但是大家都清楚，如果一个类或者方法承载了太多的功能，将会变得臃肿，分支条件增加，继而变得逻辑不清，难以维护。因此，适度的抽象，分层，解耦对于中大型项目尤为必要。
+
+而且在这里，`Response` 还仅仅是基础类型。如果是对象类型的话，那 `ResponseHandler` 会更加的复杂。因为 `UserInfo` 和 `OrderList` 在解析，错误抛出，错误处理等方面可能根本不同。
+
+因此就引出了下面的问题。
+
+
+
+## 如何处理不同类型的错误处理和抛出
+
+为了处理这个问题，我们可以声明一个 `JingDataNetworkDataResponse`，约束其具有和 `JingDataNetworkResponseHandler` 相同的能力。
+
+```swift
+public protocol JingDataNetworkDataResponse {
+    associatedtype DataSource
+    var data: DataSource { set get }
+    func makeCustomJingDataNetworkError() -> JingDataNetworkError?
+    func handleJingDataNetworkError(_ error: JingDataNetworkError)
+    init?(_ data: Data)
+}
+
+public extension JingDataNetworkDataResponse {
+    public func makeCustomJingDataNetworkError() -> JingDataNetworkError? {
+        return nil
+    }
+    public func handleJingDataNetworkError(_ error: JingDataNetworkError) {
+        
+    }
+}
+
+public protocol JingDataNetworkDataResponseHandler: JingDataNetworkResponseHandler where Response: JingDataNetworkDataResponse {}
+```
+
+实现这个协议，就会发现 `UserInfo` 和 `OrderList` 完全可以使用不同的方式来处理：
+
+```swift
+struct BaseDataResponse: JingDataNetworkDataResponse {
+
+    var data: String = ""
+    var code: Int = 0
+    
+    init?(_ data: Data) {
+        self.data = "str"
+        self.code = 0
+    }
+    
+    func makeCustomJingDataNetworkError() -> JingDataNetworkError? {
+        switch code {
+        case 0:
+            return nil
+        default:
+            return JingDataNetworkError.custom(code: code)
+        }
+    }
+}
+
+struct BaseDataResponseHandler<R: JingDataNetworkDataResponse>: JingDataNetworkDataResponseHandler {
+    var response: R?
+}
+```
+
+
+
+## 如何发起请求
+
+`JingDataNetworkManager` 中使用 `Moya` 和 `RxSwift` 对网络请求进行了封装，主要做了下面几件事：
+
+- 网络请求错误码抛出；
+- Data 转 Response 错误抛出；
+- ProgressBlock 设定；
+- Test 设定；
+- 网络请求 Observer  构造；
+
+
+
+## 使用示例
+
+```swift
+        // 获取 response
+        JingDataNetworkManager.base(api: TestApi.m)
+            .bind(BaseResponseHandler.self)
+            .single()
+            .observeOn(MainScheduler.instance)
+            .subscribe(onSuccess: { (response) in
+                print(response)
             })
-        }
-    }
+            .disposed(by: bag)
+        
+        // 获取 response.data
+        JingDataNetworkManager.base(api: TestApi.m)
+            .bind(BaseDataResponseHandler<BaseDataResponse>.self)
+            .single()
+            .observeOn(MainScheduler.instance)
+            .subscribe(onSuccess: { (data) in
+                print(data.count)
+            })
+            .disposed(by: bag)
+        
+        // 获取 response.listData
+        JingDataNetworkManager.base(api: TestApi.m)
+            .bind(BaseListDataResponseHandler<BaseListDataResponse>.self)
+            .single()
+            .observeOn(MainScheduler.instance)
+            .subscribe(onSuccess: { (listData) in
+                print(listData.count)
+            })
+            .disposed(by: bag)
 ```
-
-
-
-### 使用示例
-
-实现一个后台对应的配置项：
-
-```swift
-struct BaseNetworkConfig: JingDataNetworkConfig {
-    static var plugins: [PluginType] = []
-    
-    static var networkManager: Manager {
-        set {
-            
-        }
-        get {
-            let configuration = URLSessionConfiguration.default
-            configuration.httpAdditionalHeaders = Manager.defaultHTTPHeaders
-            configuration.timeoutIntervalForRequest = 15
-            configuration.timeoutIntervalForResource = 60
-            let manager = Manager(configuration: configuration)
-            manager.startRequestsImmediately = false
-            return manager
-        }
-    }
-    
-    static func handleJingDataNetworkError(_ error: JingDataNetworkError) {
-        print(error.description)
-    }
-}
-```
-
-实现一个解析规则和状态错误抛出：
-
-```swift
-class BaseResp<T: Mappable>: JingDataNetworkBaseResponse {
-    
-    typealias DataSource = T
-    
-    var data: T?
-    var code: Int?
-
-    func makeCustomJingDataError() -> JingDataNetworkError? {
-        guard let c = code else { return nil }
-        guard c != 0 else { return nil }
-        return JingDataNetworkError.custom(code: c)
-    }
-}
-```
-
-实现一个具体要解析的模型：
-
-```swift
-struct UserInfo: Mappable {
-    var age: Int?
-    var name: String?
-}
-```
-
-发起一个模型解析网络请求：
-
-```swift
-JingDataNetworkManager<TestApi, BaseNetworkConfig>
-    .base(api: .n)
-    .observer(test: true, progress: { (data) in
-        print(data.progress)
-    })
-    .observeOn(MainScheduler.instance)
-    .subscribe(onNext: { (data: BaseResp<UserInfo>) in
-        print(data)
-    }, onError: { (e) in
-        print(e as! JingDataNetworkError)
-    })
-    .disposed(by: bag)
-```
-
-发起一个 String 解析网络请求：
-
-```swift
-JingDataNetworkManager<TestApi, BaseNetworkConfig>
-    .base(api: .n)
-    .observer(test: true, progress: { (data) in
-        print(data.progress)
-    })
-    .observeOn(MainScheduler.instance)
-    .subscribe(onNext: { (data: String) in
-        print(data)
-    }, onError: { (e) in
-        print(e as! JingDataNetworkError)
-    })
-    .disposed(by: bag)
-```
-
-发起一个 JSON 数组的网络请求：
-
-```swift
-JingDataNetworkManager<TestApi, BaseNetworkConfig>
-    .base(api: .n)
-    .observer(test: true, progress: { (data) in
-        print(data.progress)
-    })
-    .observeOn(MainScheduler.instance)
-    .subscribe(onNext: { (data: JSON) in
-        print(data.arrayValue.count)
-    }, onError: { (e) in
-        print(e as! JingDataNetworkError)
-    })
-    .disposed(by: bag)
-```
-
-至此，我们就可以针对一个后台的不同解析规则进行适配。并可以进一步进行封装，使其使用更加简洁。
-
-
-
-### 其他问题
-
-现在我们已经可以解决上面抛出的问题。但是还有两点做的不够好，一个是在模型的解析上只能依赖 `ObjectMapper` 进行处理，另一方面在数组类型方面也没有特别支持。
 
 
 
@@ -369,25 +324,30 @@ JingDataNetworkManager<TestApi, BaseNetworkConfig>
 
 
 
-### 相同模型
+## 相同 Response
 
 ```swift
-public func zip<R>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<[R]> {
-    var obs = [Observable<R>]()
-    for api in apis {
-        let ob: Observable<R> = JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-        obs.append(ob)
+public struct JingDataNetworkSameHandlerSequencer<Handler: JingDataNetworkResponseHandler> {
+    
+    public init () {}
+    
+    public func zip(apis: [TargetType], progress: ProgressBlock? = nil, test: Bool = false) -> PrimitiveSequence<SingleTrait, [Handler.Response]> {
+        var singles = [PrimitiveSequence<SingleTrait, Handler.Response>]()
+        for api in apis {
+            let single = JingDataNetworkManager.base(api: api).bind(Handler.self).single(progress: progress, test: test)
+            singles.append(single)
+        }
+        return Single.zip(singles)
     }
-    return Observable.zip(obs)
-}
-
-public func map<R>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
-    var obs = [Observable<R>]()
-    for api in apis {
-        let ob: Observable<R> = JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-        obs.append(ob)
+    
+    public func map(apis: [TargetType], progress: ProgressBlock? = nil, test: Bool = false) -> Observable<Handler.Response> {
+        var singles = [PrimitiveSequence<SingleTrait, Handler.Response>]()
+        for api in apis {
+            let single = JingDataNetworkManager.base(api: api).bind(Handler.self).single(progress: progress, test: test)
+            singles.append(single)
+        }
+        return Observable.from(singles).merge()
     }
-    return Observable.from(obs).merge()
 }
 ```
 
@@ -396,25 +356,25 @@ public func map<R>(apis: [T], progress: ProgressBlock? = nil, test: Bool = false
 使用示例：
 
 ```swift
-JingDataNetworkSequencer<BaseNetworkConfig>.sameModel()
-    .zip(apis: [TestApi.m, .n], test: true)
-    .subscribe(onNext: { (d: [BaseResp<UserInfo>]) in
-        print(d.map { $0.data!.name! })
-    }).disposed(by: bag)
+        let sequencer = JingDataNetworkSequencer.sameHandler(BaseListDataResponseHandler<BaseListDataResponse>.self)
+        sequencer.zip(apis: [TestApi.m, Test2Api.n])
+            .subscribe(onSuccess: { (responseList) in
+                print(responseList.map({$0.listData}))
+            })
+        .disposed(by: bag)
+        
+        sequencer.map(apis: [TestApi.m, Test2Api.n])
+            .subscribe(onNext: { (response) in
+                print(response.listData)
+            })
+        .disposed(by: bag)
 ```
 
-```
-JingDataNetworkSequencer<BaseNetworkConfig>.sameModel()
-    .map(apis: [TestApi.m, .n], test: true)
-    .observeOn(MainScheduler.instance)
-    .subscribe(onNext: { (d: BaseResp<UserInfo>) in
-        print(d.data!.name!)
-    }).disposed(by: bag)
-```
 
 
+##不同 Response
 
-### 不同模型顺序请求
+###顺序请求
 
 不同的模型相对复杂，因为它意味着不同的后台或解析规则，同时，顺序请求时，又要求可以获取上一次请求的结果，顺序请求完成时，又可以取得最终的请求结果。
 
@@ -427,7 +387,7 @@ JingDataNetworkSequencer<BaseNetworkConfig>.sameModel()
 `data` 是本次请求的结果，用于传给下一个请求。
 
 ```swift
-public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
+public class JingDataNetworkDifferentMapHandlerSequencer {
     
     var blocks = [JingDataNetworkViodCallback]()
     let semaphore = DispatchSemaphore(value: 1)
@@ -437,35 +397,41 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
     var results = [Any]()
     var index: Int = 0
     
-    public func next<T: TargetType, N: JingDataNetworkBaseResponse, P>(with: @escaping (P) -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
+    public init() {}
+    
+    @discardableResult
+    public func next<C: JingDataNetworkResponseHandler, T: TargetType, P>(bind: C.Type, with: @escaping (P) -> T?, progress: ProgressBlock? = nil, success: @escaping (C.Response) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentMapHandlerSequencer {
         let api: () -> T? = {
             guard let preData = self.data as? P else { return nil }
             return with(preData)
         }
-        return next(api: api, progress: progress, success: success, error: error, test: test)
+        return next(bind: bind, api: api, progress: progress, success: success, error: error, test: test)
     }
     
-    public func next<T: TargetType, N: JingDataNetworkBaseResponse>(api: @escaping () -> T?, progress: ProgressBlock? = nil, success: @escaping (N) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentModelSequencer {
+    @discardableResult
+    public func next<C: JingDataNetworkResponseHandler, T: TargetType>(bind: C.Type, api: @escaping () -> T?, progress: ProgressBlock? = nil, success: @escaping (C.Response) -> (), error: ((Error) -> ())? = nil, test: Bool = false) -> JingDataNetworkDifferentMapHandlerSequencer {
         let block: JingDataNetworkViodCallback = {
             guard let api = api() else {
                 self.requestSuccess = false
                 return
             }
             self.semaphore.wait()
-            JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
-                .observeOn(MainScheduler.instance)
-                .subscribe(onNext: { [weak self] (data: N) in
-                    self?.data = data
-                    self?.results.append(data)
-                    self?.requestSuccess = true
-                    success(data)
+            JingDataNetworkManager.base(api: api).bind(C.self)
+            .single(progress: progress, test: test)
+            .observeOn(MainScheduler.instance)
+            .subscribe(onSuccess: { [weak self] (data) in
+                self?.data = data
+                self?.results.append(data)
+                self?.requestSuccess = true
+                success(data)
+                self?.semaphore.signal()
+                }, onError: { [weak self] (e) in
+                    self?.requestSuccess = false
+                    error?(e)
                     self?.semaphore.signal()
-                    }, onError: { [weak self] (e) in
-                        self?.requestSuccess = false
-                        error?(e)
-                        self?.semaphore.signal()
-                })
-                .disposed(by: self.bag)
+            })
+            .disposed(by: self.bag)
+
             self.semaphore.wait()
             // print("xxxxxxxxx")
             self.semaphore.signal()
@@ -476,7 +442,7 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
     
     public func run() -> PrimitiveSequence<SingleTrait, [Any]> {
         let ob = Single<[Any]>.create { (single) -> Disposable in
-            let queue = DispatchQueue(label: "\(JingDataNetworkDifferentModelSequencer.self)", qos: .default, attributes: .concurrent)
+            let queue = DispatchQueue(label: "\(JingDataNetworkDifferentMapHandlerSequencer.self)", qos: .default, attributes: .concurrent)
             queue.async {
                 for i in 0 ..< self.blocks.count {
                     self.index = i
@@ -489,7 +455,6 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
                     single(.success(self.results))
                 }
                 else {
-                    C.handleJingDataNetworkError(.sequence(.break(index: self.index)))
                     single(.error(JingDataNetworkError.sequence(.break(index: self.index))))
                 }
                 self.requestFinish()
@@ -505,70 +470,95 @@ public class JingDataNetworkDifferentModelSequencer<C: JingDataNetworkConfig> {
         blocks.removeAll()
         results.removeAll()
     }
+    
+    deinit {
+        debugPrint("\(#file) \(#function)")
+    }
 }
 ```
 
 示例：
 
 ```swift
-JingDataNetworkSequencer<BaseNetworkConfig>.differentModel()
-    .next(api: { () -> TestApi? in
-        return .m
-    }, success: { (data: String) in
-        print(data)
-    }, error: { (error) in
-        print(error)
-    }, test: true)
-    .next(with: { (data: String) -> TestApi in
-        return .m
-    }, success: { (data: UserInfo) in
-        print(data.data!.age!)
-    }, error: { (error) in
-        print(error)
-    }, test: true)
-    .run()
-    .observeOn(MainScheduler.instance)
-    .subscribe(onSuccess: { (result) in
-        print("success", Thread.current)
-    }) { (error) in
-        print(error)
-}.disposed(by: bag)
+        let sequencer = JingDataNetworkSequencer.differentHandlerMap
+        sequencer.next(bind: BaseResponseHandler.self, api: {TestApi.m}, success: { (response) in
+            print(response)
+        })
+        sequencer.next(bind: BaseListDataResponseHandler<BaseListDataResponse>.self, with: { (data: String) -> TestApi? in
+            print(data)
+            return .n
+        }, success: { (response) in
+            print(response)
+        })
+        sequencer.next(bind: BaseListDataResponseHandler<BaseListDataResponse>.self, with: { (data: BaseListDataResponse) -> Test2Api? in
+            print(data)
+            return .n
+        }, success: { (response) in
+            print(response)
+        })
+        sequencer.run().asObservable()
+            .subscribe(onNext: { (results) in
+                print(results)
+            })
+        .disposed(by: bag)
 ```
 
 
 
-### 不同模型打包请求
+### 打包请求
+
+在打包请求中，我们将一个请求视为一个 task：
 
 ```swift
-public extension JingDataNetworkDifferentModelSequencer {
+public struct JingDataNetworkTask<H: JingDataNetworkResponseHandler>: JingDataNetworkTaskInterface {
     
-    public func observerOfzip<T: TargetType, R: JingDataNetworkBaseResponse>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
-        return JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
+    public var api: TargetType
+    public var handler: H.Type
+    public var progress: ProgressBlock? = nil
+    public var test: Bool = false
+    
+    public init(api: TargetType, handler: Handler.Type, progress: ProgressBlock? = nil, test: Bool = false) {
+        self.api = api
+        self.handler = handler
+        self.progress = progress
+        self.test = test
     }
     
-    public func observerOfzip<T: TargetType, R>(api: T, progress: ProgressBlock? = nil, test: Bool = false) -> Observable<R> {
-        return JingDataNetworkManager<T, C>.base(api: api).observer(test: test, progress: progress)
+    public func single() -> PrimitiveSequence<SingleTrait, H.Response> {
+        return JingDataNetworkManager.base(api: api).bind(handler).single(progress: progress, test: test)
     }
 }
 ```
 
-不同模型的打包请求利用 `RxSwift` 很容易处理，示例如下：
+通过对 `Single.zip` 的再次封装，完成打包请求的目标：
 
 ```swift
-let o1: Observable<BaseResp<UserInfo>> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: TestApi.m, test: true)
-let o2: Observable<BaseResp<UserInfo>> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: TestApi.n, test: true)
-let o3: Observable<String> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: Test2Api.n, test: true)
-let o4: Observable<BaseResp<UserInfo>> = JingDataNetworkSequencer<BaseNetworkConfig>.differentModel().observerOfzip(api: Test2Api.n, test: true)
-Observable.zip(o1, o2, o3, o4)
-.observeOn(MainScheduler.instance)
-    .subscribe(onNext: { (str1, user1, str2, user2) in
-        print(Thread.current)
-        print(str1, user1, str2, user2)
-    }, onError: { (e) in
-        print(e)
-    })
-.disposed(by: bag)
+public struct JingDataNetworkDifferentZipHandlerSequencer {
+    
+    public init() {}
+    
+    public func zip<H1: JingDataNetworkResponseHandler, H2: JingDataNetworkResponseHandler, H3: JingDataNetworkResponseHandler>(_ source1: JingDataNetworkTask<H1>, _ source2: JingDataNetworkTask<H2>, _ source3: JingDataNetworkTask<H3>) -> PrimitiveSequence<SingleTrait, (H1.Response, H2.Response, H3.Response)> {
+        return Single.zip(source1.single(), source2.single(), source3.single())
+    }
+    
+    public func zip<H1: JingDataNetworkResponseHandler, H2: JingDataNetworkResponseHandler>(_ source1: JingDataNetworkTask<H1>, _ source2: JingDataNetworkTask<H2>) -> PrimitiveSequence<SingleTrait, (H1.Response, H2.Response)> {
+        return Single.zip(source1.single(), source2.single())
+    }
+}
 ```
+
+示例：
+
+```swift
+        let task1 = JingDataNetworkTask(api: TestApi.m, handler: BaseResponseHandler.self)
+        let task2 = JingDataNetworkTask(api: Test2Api.n, handler: BaseListDataResponseHandler<BaseListDataResponse>.self)
+        let sequencer = JingDataNetworkSequencer.differentHandlerZip
+        sequencer.zip(task1, task2).subscribe(onSuccess: { (data1, data2) in
+            print(data1, data2)
+        }).disposed(by: bag)
+```
+
+
 
 
 
